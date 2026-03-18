@@ -456,13 +456,40 @@ td.med-name{color:var(--text);font-weight:700}
       <!-- DASHBOARD -->
       <div id="page-dashboard">
         <div class="stats-grid" id="dashStats"></div>
-        <div class="grid-2">
-          <div class="card"><div class="card-title mb-3">Ventas Ultimos 7 Dias</div><canvas id="chartVentas" height="200"></canvas></div>
-          <div class="card"><div class="card-title mb-3">Alertas Criticas</div><div id="dashAlertas"></div></div>
+
+        <!-- FILA 1: Gráfica + Alertas + Caja del Día -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 320px;gap:16px;margin-bottom:16px">
+          <div class="card"><div class="card-title mb-3">📈 Ventas Últimos 7 Días</div><canvas id="chartVentas" height="200"></canvas></div>
+          <div class="card"><div class="card-title mb-3">🚨 Alertas Críticas</div><div id="dashAlertas"></div></div>
+          <!-- MÓDULO 1: CAJA DEL DÍA -->
+          <div class="card" style="background:linear-gradient(135deg,#EFF6FF,#F5F3FF);border-color:#BFDBFE">
+            <div class="card-title mb-3" style="color:var(--accent)">💰 Caja del Día</div>
+            <div id="dashCaja"></div>
+          </div>
         </div>
-        <div class="grid-2 mt-4">
-          <div class="card"><div class="card-title mb-3">Top Medicamentos</div><div id="dashTopMeds"></div></div>
-          <div class="card"><div class="card-title mb-3">Ultimas Ventas</div><div id="dashUltVentas"></div></div>
+
+        <!-- FILA 2: Top Meds + Últimas Ventas + Panel Derecho -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 320px;gap:16px">
+          <div class="card"><div class="card-title mb-3">🏆 Top Medicamentos</div><div id="dashTopMeds"></div></div>
+          <div class="card"><div class="card-title mb-3">🕐 Últimas Ventas</div><div id="dashUltVentas"></div></div>
+          <!-- PANEL DERECHO: Stock Crítico + Vencimientos + Recetas -->
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <!-- MÓDULO 2: STOCK CRÍTICO -->
+            <div class="card" style="background:linear-gradient(135deg,#FFF7ED,#FEF2F2);border-color:#FED7AA">
+              <div class="card-title mb-2" style="color:var(--warn)">📦 Stock Crítico</div>
+              <div id="dashStockCritico" style="font-size:12px"></div>
+            </div>
+            <!-- MÓDULO 3: VENCIMIENTOS 7 DÍAS -->
+            <div class="card" style="background:linear-gradient(135deg,#FEF2F2,#FFF7ED);border-color:#FECACA">
+              <div class="card-title mb-2" style="color:var(--danger)">⏰ Vencen esta Semana</div>
+              <div id="dashVencimientos" style="font-size:12px"></div>
+            </div>
+            <!-- MÓDULO 4: RECETAS PENDIENTES -->
+            <div class="card" style="background:linear-gradient(135deg,#F0FDF4,#EFF6FF);border-color:#BBF7D0">
+              <div class="card-title mb-2" style="color:var(--neon)">📋 Recetas Pendientes</div>
+              <div id="dashRecetas" style="font-size:12px"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1238,6 +1265,54 @@ function renderDashboard(){
   if(dv){var ult=ventas.slice(-5).reverse();
     if(!ult.length)dv.innerHTML='<div class="section-empty" style="padding:18px"><div class="e-icon" style="font-size:28px">&#x1F6D2;</div><p>Sin ventas</p></div>';
     else dv.innerHTML=ult.map(function(v){return '<div style="display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">'+(v.items&&v.items.length?v.items[0].nombre:'Venta')+'</div><div style="font-size:10px;color:var(--text2)">'+fmtDate(v.fecha)+' '+fmtTime(v.fecha)+'</div></div><span style="color:var(--neon);font-weight:700;font-size:12px">$'+fmt(v.totalUSD)+'</span></div>';}).join('');}
+
+  // MÓDULO 1: CAJA DEL DÍA
+  var cajael=document.getElementById('dashCaja');
+  if(cajael){
+    var porMetodo={};
+    vh.forEach(function(v){porMetodo[v.metodo]=(porMetodo[v.metodo]||0)+v.totalUSD;});
+    var metodoRows=Object.entries(porMetodo).map(function(e){
+      return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(37,99,235,0.08)"><span style="font-size:11px;color:var(--text2)">'+e[0]+'</span><span style="font-size:11px;font-weight:700;color:var(--accent)">$'+fmt(e[1])+'</span></div>';
+    }).join('');
+    cajael.innerHTML='<div style="text-align:center;padding:10px 0;border-bottom:1px solid rgba(37,99,235,0.12);margin-bottom:10px"><div style="font-size:28px;font-weight:900;color:var(--accent)">$'+fmt(th)+'</div><div style="font-size:10px;color:var(--text3);margin-top:2px">'+vh.length+' transacciones · '+fmtLocal(th*STATE.tasa)+'</div></div>'+(metodoRows||'<div style="text-align:center;padding:10px;color:var(--text3);font-size:11px">Sin ventas hoy</div>');
+  }
+
+  // MÓDULO 2: STOCK CRÍTICO
+  var scEl=document.getElementById('dashStockCritico');
+  if(scEl){
+    var criticos=meds.filter(function(m){return m.stock<=0||(m.stock<=(m.stockMin||5)&&m.stock>0);}).slice(0,5);
+    if(!criticos.length){scEl.innerHTML='<div style="text-align:center;padding:8px;color:var(--neon);font-size:11px">✅ Stock en orden</div>';}
+    else scEl.innerHTML=criticos.map(function(m){
+      var color=m.stock<=0?'var(--danger)':'var(--warn)';
+      var estado=m.stock<=0?'AGOTADO':''+m.stock+' uds';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(217,119,6,0.10)"><span style="color:var(--text);font-weight:600;font-size:11px">'+m.nombre.substring(0,20)+'</span><span style="color:'+color+';font-weight:700;font-size:10px">'+estado+'</span></div>';
+    }).join('');
+  }
+
+  // MÓDULO 3: VENCIMIENTOS 7 DÍAS
+  var vencEl=document.getElementById('dashVencimientos');
+  if(vencEl){
+    var vence7=meds.filter(function(m){var d=diasHastaVencer(m.vencimiento);return d>=0&&d<=7;}).sort(function(a,b){return diasHastaVencer(a.vencimiento)-diasHastaVencer(b.vencimiento);}).slice(0,5);
+    if(!vence7.length){vencEl.innerHTML='<div style="text-align:center;padding:8px;color:var(--neon);font-size:11px">✅ Sin vencimientos esta semana</div>';}
+    else vencEl.innerHTML=vence7.map(function(m){
+      var d=diasHastaVencer(m.vencimiento);
+      var color=d<=0?'var(--danger)':d<=3?'var(--warn)':'var(--text2)';
+      var label=d<=0?'HOY VENCE':d===1?'Mañana':d+' días';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(220,38,38,0.08)"><span style="color:var(--text);font-weight:600;font-size:11px">'+m.nombre.substring(0,18)+'</span><span style="color:'+color+';font-weight:700;font-size:10px">'+label+'</span></div>';
+    }).join('');
+  }
+
+  // MÓDULO 4: RECETAS PENDIENTES
+  var recEl=document.getElementById('dashRecetas');
+  if(recEl){
+    var recs=DB.get('recetas')||[];
+    var hoyStr=new Date().toISOString().split('T')[0];
+    var recHoy=recs.filter(function(r){return r.fecha===hoyStr;}).slice(-4).reverse();
+    if(!recHoy.length){recEl.innerHTML='<div style="text-align:center;padding:8px;color:var(--text3);font-size:11px">Sin recetas hoy</div>';}
+    else recEl.innerHTML=recHoy.map(function(r){
+      return '<div style="padding:5px 0;border-bottom:1px solid rgba(5,150,105,0.10)"><div style="font-size:11px;font-weight:700;color:var(--text)">'+r.paciente+'</div><div style="font-size:10px;color:var(--text3)">Dr. '+r.medico+' · '+r.medicamentos.substring(0,25)+'</div></div>';
+    }).join('');
+  }
 }
 
 // POS
