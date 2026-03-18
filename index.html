@@ -449,6 +449,7 @@ td.med-name{color:var(--text);font-weight:700}
           <span>&#x26A0;&#xFE0F;</span><span id="topbarAlertText">0 alertas</span>
         </div>
         <button onclick="mostrarCierreDiario()" style="background:rgba(0,200,255,.08);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;padding:6px 10px;cursor:pointer;font-family:var(--font)">&#x1F4CA; Cierre</button>
+        <button id="syncBtn" onclick="if(window.syncFarmacia)syncFarmacia()" style="background:rgba(0,200,255,.08);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;padding:6px 10px;cursor:pointer;font-family:var(--font)">&#x2601;&#xFE0F; Sync</button>
         <div class="theme-toggle" onclick="toggleTheme()">&#x1F319;</div>
         <div style="font-size:11px;color:var(--text2)" id="userName2"></div>
       </div>
@@ -2053,6 +2054,149 @@ function renderConfiguracionPanel(){
     else if(page==='configuracion')renderConfiguracionPanel();
   };
 })();
+</script>
+
+<!-- ☁️ FIREBASE CLOUD SYNC -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCfAh2-K5oe1XPVFvB4jbN62nSOTFq22jo",
+  authDomain: "bodega-pro-cloud.firebaseapp.com",
+  projectId: "bodega-pro-cloud",
+  storageBucket: "bodega-pro-cloud.firebasestorage.app",
+  messagingSenderId: "245806066684",
+  appId: "1:245806066684:web:e45935a6bbe96c9a17a079"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+function setSyncStatus(status) {
+  var btn = document.getElementById('syncBtn');
+  if (!btn) return;
+  if (status === 'syncing') {
+    btn.innerHTML = '&#x23F3; Sincronizando...';
+    btn.disabled = true;
+  } else if (status === 'ok') {
+    btn.innerHTML = '&#x2705; Sincronizado';
+    btn.disabled = false;
+    setTimeout(function() { btn.innerHTML = '&#x2601;&#xFE0F; Sync'; }, 3000);
+  } else {
+    btn.innerHTML = '&#x274C; Error';
+    btn.disabled = false;
+    setTimeout(function() { btn.innerHTML = '&#x2601;&#xFE0F; Sync'; }, 3000);
+  }
+}
+
+window.syncFarmacia = async function() {
+  if (!window.DB) return;
+  if (!navigator.onLine) { setSyncStatus('error'); return; }
+  var deviceId = (typeof DEVICE_ID !== 'undefined' ? DEVICE_ID : 'unknown');
+  var cfg = DB.get('config') || {};
+  var negocio = (cfg.negocio || 'farmacia').replace(/\s+/g, '_').toLowerCase();
+  setSyncStatus('syncing');
+  var colecciones = ['medicamentos', 'ventas', 'clientes', 'recetas', 'proveedores'];
+  var ok = true;
+  for (var i = 0; i < colecciones.length; i++) {
+    var col = colecciones[i];
+    try {
+      await setDoc(doc(db, col, deviceId), {
+        datos: DB.get(col) || [],
+        deviceId: deviceId,
+        negocio: negocio,
+        _ts: serverTimestamp(),
+        _app: 'farmacia-pro'
+      });
+    } catch(e) {
+      console.error('Sync error [' + col + ']:', e);
+      ok = false;
+    }
+  }
+  try {
+    await setDoc(doc(db, 'config', deviceId), {
+      datos: cfg,
+      deviceId: deviceId,
+      negocio: negocio,
+      _ts: serverTimestamp(),
+      _app: 'farmacia-pro'
+    });
+  } catch(e) {
+    console.error('Sync error [config]:', e);
+    ok = false;
+  }
+  setSyncStatus(ok ? 'ok' : 'error');
+};
+
+// Online / Offline indicator
+function updateOnlineStatus() {
+  var online = navigator.onLine;
+  var dot = document.getElementById('onlineDot');
+  var text = document.getElementById('onlineText');
+  var indicator = document.getElementById('onlineIndicator');
+  if (!dot || !text || !indicator) return;
+  if (online) {
+    dot.style.background = '#00e5a0';
+    text.textContent = 'Online';
+    indicator.style.background = 'rgba(0,229,160,.12)';
+    indicator.style.borderColor = 'rgba(0,229,160,.3)';
+    indicator.style.color = '#00e5a0';
+  } else {
+    dot.style.background = '#ff4d6d';
+    text.textContent = 'Offline';
+    indicator.style.background = 'rgba(255,77,109,.12)';
+    indicator.style.borderColor = 'rgba(255,77,109,.3)';
+    indicator.style.color = '#ff4d6d';
+  }
+}
+
+window.addEventListener('online', function() {
+  updateOnlineStatus();
+  setTimeout(function() { if (window.syncFarmacia) window.syncFarmacia(); }, 1500);
+});
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// Auto-sync on DB.set (debounced 2s) — patches after main script is ready
+setTimeout(function() {
+  if (window.DB && window.DB.set) {
+    var _origSet = window.DB.set.bind(window.DB);
+    var SYNC_KEYS = ['medicamentos','ventas','clientes','recetas','proveedores','config'];
+    window.DB.set = function(key, val) {
+      _origSet(key, val);
+      if (SYNC_KEYS.indexOf(key) !== -1) {
+        clearTimeout(window._autoSyncTimer);
+        window._autoSyncTimer = setTimeout(function() {
+          if (navigator.onLine && window.syncFarmacia) window.syncFarmacia();
+        }, 2000);
+      }
+    };
+  }
+  // Patch doLogin to trigger sync after successful login
+  if (window.doLogin) {
+    var _origLogin = window.doLogin;
+    window.doLogin = function() {
+      _origLogin.apply(this, arguments);
+      setTimeout(function() {
+        if (navigator.onLine && window.syncFarmacia) {
+          var app = document.getElementById('app');
+          if (app && app.style.display !== 'none') window.syncFarmacia();
+        }
+      }, 2000);
+    };
+  }
+}, 500);
+
+// Auto-sync every 5 minutes
+setInterval(function() {
+  if (navigator.onLine && window.syncFarmacia) {
+    var app = document.getElementById('app');
+    if (app && app.style.display !== 'none') window.syncFarmacia();
+  }
+}, 300000);
+
+console.log('🔥 Firebase conectado — farmacia-pro / bodega-pro-cloud');
 </script>
 </body>
 </html>
