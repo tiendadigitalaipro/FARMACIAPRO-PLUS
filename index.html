@@ -135,6 +135,7 @@ textarea.form-input{resize:vertical}
 /* GRID */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.page-cols{display:grid;grid-template-columns:1fr 300px;gap:16px}
 .mb-4{margin-bottom:18px} .mb-3{margin-bottom:14px} .mb-2{margin-bottom:9px}
 .mt-3{margin-top:14px} .mt-4{margin-top:18px}
 .flex{display:flex} .items-center{align-items:center} .justify-between{justify-content:space-between}
@@ -247,6 +248,7 @@ td.med-name{color:var(--text);font-weight:700}
   .sidebar-overlay.show{display:block}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .grid-2{grid-template-columns:1fr}
+  .page-cols{grid-template-columns:1fr}
   .pos-layout{grid-template-columns:1fr;height:auto;display:flex;flex-direction:column-reverse}
   .pos-cart{max-height:55vh}
   .cart-items{max-height:150px}
@@ -538,7 +540,19 @@ td.med-name{color:var(--text);font-weight:700}
         <div class="flex justify-between items-center mb-4">
           <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Alertas</h2><div style="font-size:12px;color:var(--text2)">Vencimientos y stock critico</div></div>
         </div>
-        <div id="alertasContent"></div>
+        <div class="page-cols">
+          <div id="alertasContent"></div>
+          <div>
+            <div class="card mb-3">
+              <div class="card-title mb-3">Resumen por Tipo</div>
+              <div id="alertasResumen"></div>
+            </div>
+            <div class="card">
+              <div class="card-title mb-3">Acciones Rapidas</div>
+              <div id="alertasAcciones"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- RECETAS -->
@@ -547,7 +561,19 @@ td.med-name{color:var(--text);font-weight:700}
           <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Recetas Medicas</h2></div>
           <button class="btn btn-primary" onclick="openAddReceta()">+ Nueva Receta</button>
         </div>
-        <div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>Fecha</th><th>Paciente</th><th>Medico</th><th>Medicamentos</th><th>Acciones</th></tr></thead><tbody id="recetasTable"></tbody></table></div></div>
+        <div class="page-cols">
+          <div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>Fecha</th><th>Paciente</th><th>Medico</th><th>Medicamentos</th><th>Acciones</th></tr></thead><tbody id="recetasTable"></tbody></table></div></div>
+          <div>
+            <div class="card mb-3">
+              <div class="card-title mb-3">Estadisticas</div>
+              <div id="recetasStats"></div>
+            </div>
+            <div class="card">
+              <div class="card-title mb-3">Medicos Frecuentes</div>
+              <div id="recetasMedicos"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- CLIENTES -->
@@ -556,9 +582,21 @@ td.med-name{color:var(--text);font-weight:700}
           <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Clientes</h2></div>
           <button class="btn btn-primary" onclick="openAddCliente()">+ Nuevo Cliente</button>
         </div>
-        <div class="card">
-          <div class="search-bar mb-3"><span>&#x1F50D;</span><input type="text" id="clienteSearch" placeholder="Buscar cliente..." oninput="renderClientes()"></div>
-          <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Telefono</th><th>CI</th><th>Deuda</th><th>Ultima Compra</th><th>Acciones</th></tr></thead><tbody id="clientesTable"></tbody></table></div>
+        <div class="page-cols">
+          <div class="card">
+            <div class="search-bar mb-3"><span>&#x1F50D;</span><input type="text" id="clienteSearch" placeholder="Buscar cliente..." oninput="renderClientes()"></div>
+            <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Telefono</th><th>CI</th><th>Deuda</th><th>Ultima Compra</th><th>Acciones</th></tr></thead><tbody id="clientesTable"></tbody></table></div>
+          </div>
+          <div>
+            <div class="card mb-3">
+              <div class="card-title mb-3">Clientes Recientes</div>
+              <div id="clientesTopPanel"></div>
+            </div>
+            <div class="card">
+              <div class="card-title mb-3" style="color:var(--danger)">Con Deuda</div>
+              <div id="clientesDeudaPanel"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -568,7 +606,19 @@ td.med-name{color:var(--text);font-weight:700}
           <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Historial de Ventas</h2></div>
         </div>
         <div class="stats-grid" id="histStats"></div>
-        <div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>Fecha</th><th>Productos</th><th>Metodo</th><th>Total $</th><th>Total Local</th><th>Acciones</th></tr></thead><tbody id="histTable"></tbody></table></div></div>
+        <div class="page-cols">
+          <div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>Fecha</th><th>Productos</th><th>Metodo</th><th>Total $</th><th>Total Local</th><th>Acciones</th></tr></thead><tbody id="histTable"></tbody></table></div></div>
+          <div>
+            <div class="card mb-3">
+              <div class="card-title mb-3">Resumen del Dia</div>
+              <div id="histResumenPanel"></div>
+            </div>
+            <div class="card">
+              <div class="card-title mb-3">Hora Pico</div>
+              <div id="histHoraPanel"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- PROVEEDORES -->
@@ -577,7 +627,19 @@ td.med-name{color:var(--text);font-weight:700}
           <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Proveedores</h2></div>
           <button class="btn btn-primary" onclick="openAddProveedor()">+ Nuevo Proveedor</button>
         </div>
-        <div class="card"><div class="table-wrap"><table><thead><tr><th>Laboratorio</th><th>Contacto</th><th>Telefono</th><th>Especialidad</th><th>Acciones</th></tr></thead><tbody id="provTable"></tbody></table></div></div>
+        <div class="page-cols">
+          <div class="card"><div class="table-wrap"><table><thead><tr><th>Laboratorio</th><th>Contacto</th><th>Telefono</th><th>Especialidad</th><th>Acciones</th></tr></thead><tbody id="provTable"></tbody></table></div></div>
+          <div>
+            <div class="card mb-3">
+              <div class="card-title mb-3">Ultimos Agregados</div>
+              <div id="provUltimoPanel"></div>
+            </div>
+            <div class="card">
+              <div class="card-title mb-3">Contactos Rapidos</div>
+              <div id="provContactosPanel"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- REPORTES -->
@@ -586,9 +648,10 @@ td.med-name{color:var(--text);font-weight:700}
           <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Reportes</h2></div>
         </div>
         <div class="stats-grid" id="reporteStats"></div>
-        <div class="grid-2">
+        <div class="grid-3">
           <div class="card"><div class="card-title mb-3">Ventas por Categoria</div><canvas id="chartCategorias" height="250"></canvas></div>
           <div class="card"><div class="card-title mb-3">Top Medicamentos</div><div id="topMedsReporte"></div></div>
+          <div class="card"><div class="card-title mb-3">Mas Rentables</div><div id="reporteRentablesPanel"></div></div>
         </div>
       </div>
 
@@ -597,7 +660,7 @@ td.med-name{color:var(--text);font-weight:700}
         <div class="flex justify-between items-center mb-4">
           <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Configuracion</h2></div>
         </div>
-        <div class="grid-2">
+        <div style="display:grid;grid-template-columns:1fr 1fr 280px;gap:16px">
           <div>
             <div class="card mb-4">
               <div class="card-title mb-3">Informacion de la Farmacia</div>
@@ -648,6 +711,11 @@ td.med-name{color:var(--text);font-weight:700}
                 <button class="btn btn-danger" onclick="resetearDatos()">Borrar Ventas</button>
                 <button class="btn btn-danger" onclick="resetearTodo()">Resetear Todo</button>
               </div>
+            </div>
+          </div>
+          <div>
+            <div class="card" id="cfgSistemaPanel">
+              <div style="color:var(--text2);font-size:12px;padding:8px">Cargando...</div>
             </div>
           </div>
         </div>
@@ -1908,6 +1976,83 @@ window.setGanancia=setGanancia;window.calcPrecioMed=calcPrecioMed;window.calcBsM
 window.autoEmojiMed=autoEmojiMed;
 window.toggleMobileSidebar=toggleMobileSidebar;window.closeMobileSidebar=closeMobileSidebar;
 window.toggleTheme=toggleTheme;window.openModal=openModal;window.closeModal=closeModal;
+
+// PANELES INFORMATIVOS
+function renderAlertasPanel(){
+  var meds=DB.get('medicamentos')||[];
+  var vencidos=meds.filter(function(m){return diasHastaVencer(m.vencimiento)<=0;});
+  var proxV=meds.filter(function(m){var d=diasHastaVencer(m.vencimiento);return d>0&&d<=30;});
+  var sinSt=meds.filter(function(m){return m.stock<=0;});
+  var stBj=meds.filter(function(m){return m.stock>0&&m.stock<=(m.stockMin||5);});
+  var ar=document.getElementById('alertasResumen');
+  if(ar)ar.innerHTML=[{label:'Vencidos',val:vencidos.length,color:'var(--danger)'},{label:'Prox. Vencer',val:proxV.length,color:'var(--warn)'},{label:'Sin Stock',val:sinSt.length,color:'var(--danger)'},{label:'Stock Bajo',val:stBj.length,color:'var(--warn)'}].map(function(s){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg3)"><span style="font-size:13px;color:var(--text2)">'+s.label+'</span><span style="font-weight:700;color:'+s.color+';font-size:16px">'+s.val+'</span></div>';}).join('');
+  var aa=document.getElementById('alertasAcciones');
+  if(aa){var actHtml='';if(sinSt.length||stBj.length)actHtml+='<button onclick="showPage(\'proveedores\')" class="btn btn-primary btn-full mb-2" style="font-size:12px">&#x1F4E6; Pedir Stock a Proveedor</button>';if(vencidos.length||proxV.length)actHtml+='<button onclick="showPage(\'inventario\')" class="btn btn-danger btn-full" style="font-size:12px">&#x1F6D1; Reportar Vencidos</button>';if(!actHtml)actHtml='<div style="color:var(--text2);font-size:12px;text-align:center;padding:12px">Sin acciones pendientes &#x2705;</div>';aa.innerHTML=actHtml;}
+}
+function renderRecetasPanel(){
+  var recs=DB.get('recetas')||[];var hoy=new Date().toDateString();var mes=new Date();
+  var hoyC=recs.filter(function(r){return new Date(r.fecha).toDateString()===hoy;}).length;
+  var mesC=recs.filter(function(r){var d=new Date(r.fecha);return d.getMonth()===mes.getMonth()&&d.getFullYear()===mes.getFullYear();}).length;
+  var rs=document.getElementById('recetasStats');
+  if(rs)rs.innerHTML='<div style="display:flex;gap:10px;margin-bottom:10px"><div style="flex:1;background:var(--bg3);border-radius:9px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text2)">Hoy</div><div style="font-size:24px;font-weight:700;color:var(--neon)">'+hoyC+'</div></div><div style="flex:1;background:var(--bg3);border-radius:9px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text2)">Este Mes</div><div style="font-size:24px;font-weight:700;color:var(--accent)">'+mesC+'</div></div></div><div style="font-size:11px;color:var(--text3);text-align:center">'+recs.length+' recetas total</div>';
+  var medCount={};recs.forEach(function(r){if(r.medico)medCount[r.medico]=(medCount[r.medico]||0)+1;});
+  var topMeds=Object.entries(medCount).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+  var rm=document.getElementById('recetasMedicos');
+  if(rm){if(!topMeds.length)rm.innerHTML='<div style="color:var(--text2);font-size:12px;padding:8px">Sin datos aun</div>';else rm.innerHTML=topMeds.map(function(t){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg3)"><span style="font-size:12px;color:var(--text)">'+t[0]+'</span><span class="badge badge-blue">'+t[1]+' rec.</span></div>';}).join('');}
+}
+function renderClientesPanel(){
+  var cls=DB.get('clientes')||[];
+  var deudores=cls.filter(function(c){return c.deuda>0;}).sort(function(a,b){return b.deuda-a.deuda;});
+  var ct=document.getElementById('clientesTopPanel');
+  if(ct){if(!cls.length)ct.innerHTML='<div style="color:var(--text2);font-size:12px;padding:8px">Sin clientes</div>';else{var recientes=cls.slice().sort(function(a,b){return (b.ultimaCompra||0)-(a.ultimaCompra||0);}).slice(0,5);ct.innerHTML=recientes.map(function(c){return '<div style="padding:7px 0;border-bottom:1px solid var(--bg3)"><div style="font-size:12px;font-weight:600;color:var(--text)">'+c.nombre+'</div><div style="font-size:10px;color:var(--text3)">'+(c.ultimaCompra?fmtDate(c.ultimaCompra):'Sin compras')+'</div></div>';}).join('');}}
+  var cd=document.getElementById('clientesDeudaPanel');
+  if(cd){if(!deudores.length)cd.innerHTML='<div style="color:var(--neon);font-size:12px;padding:8px">&#x2705; Sin deudas registradas</div>';else cd.innerHTML=deudores.slice(0,5).map(function(c){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg3)"><span style="font-size:12px;color:var(--text)">'+c.nombre+'</span><span style="color:var(--danger);font-weight:700;font-size:12px">$'+fmt(c.deuda)+'</span></div>';}).join('');}
+}
+function renderHistorialPanel(){
+  var ventas=DB.get('ventas')||[];var hoy=new Date().toDateString();
+  var vh=ventas.filter(function(v){return new Date(v.fecha).toDateString()===hoy;});
+  var metodos={};vh.forEach(function(v){metodos[v.metodo]=(metodos[v.metodo]||0)+1;});
+  var topM=Object.entries(metodos).sort(function(a,b){return b[1]-a[1];});
+  var horas=Array(24).fill(0);vh.forEach(function(v){var h=new Date(v.fecha).getHours();horas[h]++;});
+  var maxH=Math.max.apply(null,horas);var picoH=horas.indexOf(maxH);
+  var hr=document.getElementById('histResumenPanel');
+  if(hr){var thv=vh.reduce(function(a,v){return a+v.totalUSD;},0);hr.innerHTML='<div style="background:var(--bg3);border-radius:9px;padding:12px;margin-bottom:10px"><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Total Hoy</div><div style="font-size:22px;font-weight:700;color:var(--neon)">$'+fmt(thv)+'</div><div style="font-size:11px;color:var(--text3)">'+vh.length+' transacciones</div></div>'+(topM.length?'<div style="font-size:11px;color:var(--text2);margin-bottom:6px">Metodo mas usado</div><div style="background:var(--bg3);border-radius:7px;padding:8px 12px;font-weight:600;color:var(--accent)">'+topM[0][0]+' ('+topM[0][1]+'x)</div>':'<div style="color:var(--text2);font-size:12px">Sin ventas hoy</div>');}
+  var hh=document.getElementById('histHoraPanel');
+  if(hh){if(!vh.length)hh.innerHTML='<div style="color:var(--text2);font-size:12px;padding:8px">Sin datos hoy</div>';else hh.innerHTML='<div style="background:var(--bg3);border-radius:9px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text2)">Hora con mas ventas</div><div style="font-size:28px;font-weight:700;color:var(--warn)">'+picoH+':00</div><div style="font-size:11px;color:var(--text3)">'+maxH+' transacciones</div></div>';}
+}
+function renderProveedoresPanel(){
+  var provs=DB.get('proveedores')||[];
+  var pu=document.getElementById('provUltimoPanel');
+  if(pu){if(!provs.length)pu.innerHTML='<div style="color:var(--text2);font-size:12px;padding:8px">Sin proveedores</div>';else pu.innerHTML=provs.slice(-5).reverse().map(function(p){return '<div style="padding:7px 0;border-bottom:1px solid var(--bg3)"><div style="font-size:12px;font-weight:600;color:var(--text)">'+p.nombre+'</div><div style="font-size:10px;color:var(--text3)">'+p.especialidad+'</div></div>';}).join('');}
+  var pc=document.getElementById('provContactosPanel');
+  if(pc){var conTel=provs.filter(function(p){return p.telefono;});if(!conTel.length)pc.innerHTML='<div style="color:var(--text2);font-size:12px;padding:8px">Sin telefonos registrados</div>';else pc.innerHTML=conTel.slice(0,5).map(function(p){var tel=p.telefono.replace(/\D/g,'');return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg3)"><div><div style="font-size:12px;font-weight:600">'+p.nombre+'</div><div style="font-size:10px;color:var(--text3)">'+p.contacto+'</div></div><a href="https://wa.me/'+tel+'" target="_blank" style="background:#25D366;border-radius:6px;color:#fff;font-size:10px;padding:3px 7px;text-decoration:none">&#x1F4F1;</a></div>';}).join('');}
+}
+function renderReportesPanel(){
+  var ventas=DB.get('ventas')||[];var meds=DB.get('medicamentos')||[];
+  var ganancia={};ventas.forEach(function(v){(v.items||[]).forEach(function(it){var m=meds.find(function(x){return x.id===it.id;});var g=(it.subtotal||0)-((m?m.precioCosto:0)*it.qty);ganancia[it.nombre]=(ganancia[it.nombre]||0)+g;});});
+  var top=Object.entries(ganancia).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  var rr=document.getElementById('reporteRentablesPanel');
+  if(rr){if(!top.length)rr.innerHTML='<div class="section-empty" style="padding:18px"><p>Sin datos</p></div>';else rr.innerHTML=top.map(function(t,i){return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="background:var(--neon);color:var(--bg);border-radius:4px;font-size:10px;font-weight:700;padding:2px 5px;min-width:18px;text-align:center">'+(i+1)+'</span><span style="flex:1;font-size:12px;font-weight:600;color:var(--text)">'+t[0]+'</span><span style="color:var(--neon);font-size:12px;font-weight:700">$'+fmt(t[1])+'</span></div>';}).join('');}
+}
+function renderConfiguracionPanel(){
+  var lic=DB.get('license')||{};var cfg=DB.get('config')||{};var deviceId=(typeof DEVICE_ID!=='undefined'?DEVICE_ID:'N/A');
+  var cs=document.getElementById('cfgSistemaPanel');
+  if(cs)cs.innerHTML='<div class="card-title mb-3">Estado del Sistema</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="background:var(--neon);border-radius:50%;width:8px;height:8px;display:inline-block;flex-shrink:0"></span><span style="font-size:12px;color:var(--text2)">Sistema activo</span></div><div style="font-size:11px;color:var(--text3);margin-bottom:3px">Farmacia: '+(cfg.negocio||'No configurado')+'</div><div style="font-size:11px;color:var(--text3);margin-bottom:14px">Pais: '+(cfg.pais||'VE')+'</div><div style="border-top:1px solid var(--bg3);padding-top:12px;margin-bottom:12px"><div class="card-title mb-2">Mi Suscripcion</div><div style="background:var(--bg3);border-radius:9px;padding:10px;margin-bottom:8px"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Licencia</div><div style="font-weight:700;color:var(--neon);font-size:18px">'+(lic.tipo||'PRO')+'</div></div><div style="font-size:10px;color:var(--text3);word-break:break-all">Device ID: '+deviceId+'</div></div><div style="border-top:1px solid var(--bg3);padding-top:12px"><div class="card-title mb-2">Dispositivos</div><div style="background:var(--bg3);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--text2)">&#x1F4BB; Este dispositivo (activo)</div></div>';
+}
+// Extender showPage para renderizar paneles sin modificar la funcion original
+(function(){
+  var _sp=window.showPage;
+  window.showPage=function(page){
+    _sp(page);
+    if(page==='alertas')renderAlertasPanel();
+    else if(page==='recetas')renderRecetasPanel();
+    else if(page==='clientes')renderClientesPanel();
+    else if(page==='historial')renderHistorialPanel();
+    else if(page==='proveedores')renderProveedoresPanel();
+    else if(page==='reportes')renderReportesPanel();
+    else if(page==='configuracion')renderConfiguracionPanel();
+  };
+})();
 </script>
 </body>
 </html>
