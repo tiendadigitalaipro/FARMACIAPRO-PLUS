@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>A2K Digital Studio — Farmacia Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  /* Clean Medical Palette */
+  --bg:#F0F4F8; --bg2:#E8EEF4; --bg3:#DDE5EE;
+  --card:#FFFFFF; --card2:#F8FAFC;
+  --border:rgba(37,99,235,0.10); --border2:rgba(37,99,235,0.22);
+  --text:#0F172A; --text2:#475569; --text3:#94A3B8;
+  --accent:#2563EB; --accent2:#1D4ED8;
+  --neon:#059669; --neon2:#10B981;
+  --warn:#D97706; --danger:#DC2626; --success:#059669;
+  --font:'Plus Jakarta Sans',sans-serif;
+  --display:'Space Grotesk',sans-serif;
+  --sidebar-w:240px;
+  --shadow-sm:0 1px 3px rgba(15,23,42,0.08),0 1px 2px rgba(15,23,42,0.06);
+  --shadow-md:0 4px 16px rgba(15,23,42,0.10),0 2px 6px rgba(15,23,42,0.07);
+  --shadow-lg:0 12px 40px rgba(15,23,42,0.13),0 4px 12px rgba(15,23,42,0.08);
+  --radius:16px; --radius-sm:10px; --radius-xs:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:rgba(37,99,235,0.25);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;z-index:9000;background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 40%,#EDE9FE 100%);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.login-canvas{position:absolute;inset:0;overflow:hidden}
+.medical-particle{position:absolute;opacity:0;animation:floatUp 8s infinite ease-in-out;pointer-events:none}
+@keyframes floatUp{0%{opacity:0;transform:translateY(100vh) rotate(0deg) scale(.5)}20%{opacity:.12}80%{opacity:.06}100%{opacity:0;transform:translateY(-20vh) rotate(360deg) scale(1.2)}}
+.login-wrap{position:relative;z-index:2;width:100%;max-width:440px;padding:20px;animation:fadeInUp .8s ease both}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo-icon{width:84px;height:84px;background:linear-gradient(135deg,#2563EB,#7C3AED);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 14px;box-shadow:0 8px 32px rgba(37,99,235,0.35);animation:pulseBlue 3s ease-in-out infinite}
+@keyframes pulseBlue{0%,100%{box-shadow:0 8px 32px rgba(37,99,235,0.35)}50%{box-shadow:0 8px 48px rgba(37,99,235,0.55),0 0 80px rgba(124,58,237,0.2)}}
+.login-brand{font-family:var(--display);font-size:28px;font-weight:800;background:linear-gradient(135deg,#2563EB,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.login-brand span{display:block;font-size:12px;color:var(--text2);font-weight:500;margin-top:4px;background:none;-webkit-text-fill-color:var(--text2)}
+.login-card{background:rgba(255,255,255,0.90);border:1px solid rgba(37,99,235,0.12);border-radius:24px;padding:28px;backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(15,23,42,0.12),0 4px 16px rgba(37,99,235,0.08)}
+.login-badge{text-align:center;font-size:10px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+
+/* FORMS */
+.form-group{margin-bottom:15px}
+.form-label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;margin-bottom:6px}
+.form-input,.form-select{width:100%;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 13px;outline:none;transition:all .2s}
+.form-input:focus,.form-select:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,0.10)}
+.form-input::placeholder{color:var(--text3)}
+textarea.form-input{resize:vertical}
+.device-info{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--text2);text-align:center}
+.device-id-display{color:var(--accent);font-weight:700;font-size:11px;margin-top:3px}
+#loginAlert{display:none;padding:10px 13px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:12px;font-weight:500}
+#loginAlert.error{background:#FEF2F2;border:1px solid #FECACA;color:#DC2626}
+#loginAlert.success{background:#F0FDF4;border:1px solid #BBF7D0;color:#059669}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:var(--radius-sm);border:none;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.25)}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,0.35)}
+.btn-ghost{background:transparent;border:1.5px solid #E2E8F0;color:var(--text2)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:#EFF6FF}
+.btn-danger{background:#FEF2F2;border:1.5px solid #FECACA;color:var(--danger)}
+.btn-danger:hover{background:#FEE2E2}
+.btn-neon{background:linear-gradient(135deg,var(--neon),#10B981);color:#fff;font-weight:800;box-shadow:0 4px 14px rgba(5,150,105,0.30)}
+.btn-neon:hover{box-shadow:0 8px 24px rgba(5,150,105,0.40);transform:translateY(-2px)}
+.btn-full{width:100%}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:var(--radius-xs)}
+.btn-lg{padding:14px 24px;font-size:15px}
+
+/* APP */
+#app{display:none;height:100vh;overflow:hidden}
+.app-wrap{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid #E2E8F0;display:flex;flex-direction:column;height:100vh;overflow:hidden;flex-shrink:0;transition:left .3s;box-shadow:2px 0 12px rgba(15,23,42,0.06)}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid #F1F5F9;display:flex;align-items:center;gap:11px}
+.sidebar-logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#2563EB,#7C3AED);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,0.30)}
+.sidebar-logo-text{font-family:var(--display);font-size:14px;font-weight:800;color:var(--text);line-height:1.2}
+.sidebar-logo-text span{font-size:10px;color:var(--text3);font-weight:500;display:block;margin-top:2px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 10px}
+.nav-section{font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;padding:12px 10px 5px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;margin-bottom:2px;position:relative}
+.nav-item:hover{background:#F1F5F9;color:var(--text)}
+.nav-item.active{background:linear-gradient(135deg,#EFF6FF,#EDE9FE);color:var(--accent);font-weight:700;box-shadow:var(--shadow-sm)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:linear-gradient(180deg,#2563EB,#7C3AED);border-radius:0 3px 3px 0}
+.nav-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center}
+.sidebar-footer{padding:14px;border-top:1px solid #F1F5F9}
+.user-info{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:var(--radius-sm);cursor:pointer;transition:all .2s}
+.user-info:hover{border-color:var(--accent);background:#EFF6FF}
+.user-avatar{width:34px;height:34px;background:linear-gradient(135deg,#2563EB,#7C3AED);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.user-name{font-size:12px;font-weight:700;color:var(--text)}
+.user-role{font-size:10px;color:var(--text3)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.topbar{height:62px;flex-shrink:0;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;padding:0 22px;box-shadow:0 1px 8px rgba(15,23,42,0.06)}
+.topbar-title{font-family:var(--display);font-size:16px;font-weight:800;color:var(--text)}
+.topbar-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.topbar-alert{display:flex;align-items:center;gap:6px;background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:var(--radius-xs);padding:6px 12px;font-size:12px;color:var(--warn);cursor:pointer;font-weight:600;animation:alertPulse 2s ease-in-out infinite}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.75}}
+.theme-toggle{width:36px;height:36px;border-radius:var(--radius-xs);background:#F1F5F9;border:1.5px solid #E2E8F0;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .2s}
+.theme-toggle:hover{border-color:var(--accent);background:#EFF6FF}
+.page-body{flex:1;overflow-y:auto;padding:20px 22px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid #E8EEF6;border-radius:var(--radius);padding:20px;transition:all .2s;box-shadow:var(--shadow-sm)}
+.card:hover{box-shadow:var(--shadow-md);border-color:var(--border2)}
+.card-title{font-family:var(--display);font-size:14px;font-weight:700;color:var(--text)}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid #E8EEF6;border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:all .3s;box-shadow:var(--shadow-sm)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.stat-card.blue::before{background:linear-gradient(90deg,#2563EB,#60A5FA)}
+.stat-card.green::before{background:linear-gradient(90deg,#059669,#34D399)}
+.stat-card.warn::before{background:linear-gradient(90deg,#D97706,#FBBF24)}
+.stat-card.red::before{background:linear-gradient(90deg,#DC2626,#F87171)}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.stat-icon{font-size:28px;margin-bottom:12px}
+.stat-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-weight:700;margin-bottom:6px}
+.stat-val{font-family:var(--display);font-size:26px;font-weight:800;color:var(--text);line-height:1}
+.stat-val.green{color:var(--neon)} .stat-val.blue{color:var(--accent)} .stat-val.warn{color:var(--warn)} .stat-val.red{color:var(--danger)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:6px}
+.stat-glow{position:absolute;right:-10px;bottom:-10px;font-size:60px;opacity:.04;pointer-events:none}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.mb-4{margin-bottom:18px} .mb-3{margin-bottom:14px} .mb-2{margin-bottom:9px}
+.mt-3{margin-top:14px} .mt-4{margin-top:18px}
+.flex{display:flex} .items-center{align-items:center} .justify-between{justify-content:space-between}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.4px}
+.badge-blue{background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE}
+.badge-green{background:#F0FDF4;color:#059669;border:1px solid #BBF7D0}
+.badge-warn{background:#FFF7ED;color:#D97706;border:1px solid #FED7AA}
+.badge-red{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA}
+.badge-purple{background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE}
+.badge-gray{background:#F8FAFC;color:#64748B;border:1px solid #E2E8F0}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:var(--radius-sm)}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-weight:700;padding:10px 13px;text-align:left;border-bottom:2px solid #F1F5F9;background:#FAFBFC}
+td{padding:13px 13px;font-size:13px;color:var(--text2);border-bottom:1px solid #F1F5F9;transition:background .15s}
+tr:hover td{background:#F8FAFC}
+td.med-name{color:var(--text);font-weight:700}
+.vence-ok{color:var(--neon);font-weight:700}
+.vence-warn{color:var(--warn);font-weight:700}
+.vence-crit{color:var(--danger);font-weight:700;animation:blink .8s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* SEARCH */
+.search-bar{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #E2E8F0;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;transition:all .2s}
+.search-bar:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,0.08)}
+.search-bar input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:13px}
+.search-bar input::placeholder{color:var(--text3)}
+
+/* POS */
+.pos-layout{display:grid;grid-template-columns:1fr 360px;gap:16px;height:calc(100vh - 102px)}
+.pos-products{overflow-y:auto;padding-right:4px}
+.pos-cart{background:var(--card);border:1px solid #E8EEF6;border-radius:var(--radius);display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow-md)}
+.cart-header{padding:16px 18px;border-bottom:1px solid #F1F5F9;background:linear-gradient(135deg,#EFF6FF,#F5F3FF)}
+.cart-items{flex:1;overflow-y:auto;padding:12px}
+.cart-item{display:flex;align-items:center;gap:9px;padding:11px;border-radius:var(--radius-sm);background:#F8FAFC;margin-bottom:8px;border:1px solid #E8EEF6;transition:all .2s}
+.cart-item:hover{border-color:#BFDBFE;background:#EFF6FF}
+.cart-item-name{flex:1;font-size:13px;font-weight:700;color:var(--text)}
+.cart-item-price{font-size:13px;color:var(--neon);font-weight:800}
+.qty-btn{width:26px;height:26px;border-radius:7px;background:#fff;border:1.5px solid #E2E8F0;color:var(--accent);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.qty-btn:hover{background:#EFF6FF;border-color:var(--accent)}
+.cart-footer{padding:14px 18px;border-top:1px solid #F1F5F9;flex-shrink:0;background:#FAFBFC}
+.cart-total{font-family:var(--display);font-size:28px;font-weight:800;color:var(--text)}
+.cart-total-bs{font-size:12px;color:var(--text3);margin-bottom:12px}
+.pay-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pay-btn{flex:1 1 calc(33% - 5px);min-width:80px;padding:8px 5px;border-radius:var(--radius-xs);border:1.5px solid #E2E8F0;background:#fff;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
+.pay-btn:hover{border-color:var(--accent);color:var(--accent);background:#EFF6FF}
+.pay-btn.selected{background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border-color:var(--accent);color:var(--accent);font-weight:700;box-shadow:0 2px 8px rgba(37,99,235,0.15)}
+#btnCobrar{width:100%;padding:14px;background:linear-gradient(135deg,#2563EB,#7C3AED);border:none;border-radius:var(--radius-sm);color:#fff;font-size:15px;font-weight:900;cursor:pointer;transition:all .2s;font-family:var(--font);box-shadow:0 4px 16px rgba(37,99,235,0.30);letter-spacing:.5px}
+#btnCobrar:hover{box-shadow:0 8px 28px rgba(37,99,235,0.40);transform:translateY(-2px)}
+
+/* MEDS GRID */
+.meds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.med-card{background:var(--card);border:1.5px solid #E8EEF6;border-radius:var(--radius);padding:15px 11px;cursor:pointer;transition:all .2s;text-align:center;box-shadow:var(--shadow-sm)}
+.med-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 24px rgba(37,99,235,0.14)}
+.med-card.sin-stock{opacity:.5;cursor:not-allowed}
+.med-icon{font-size:28px;margin-bottom:8px}
+.med-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.3}
+.med-price{font-size:14px;font-weight:800;color:var(--accent)}
+.med-stock{font-size:10px;color:var(--text3);margin-top:3px}
+.med-vence{font-size:9px;margin-top:3px}
+
+/* CAT FILTERS */
+.cat-filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.cat-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #E2E8F0;background:#fff;color:var(--text2);font-size:11px;font-family:var(--font);font-weight:600;cursor:pointer;transition:all .2s}
+.cat-btn:hover{border-color:var(--accent);color:var(--accent);background:#EFF6FF}
+.cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;box-shadow:0 3px 10px rgba(37,99,235,0.25)}
+
+/* ALERTAS */
+.alerta-card{background:var(--card);border-radius:var(--radius-sm);padding:15px;border-left:4px solid var(--danger);margin-bottom:10px;display:flex;align-items:center;gap:13px;transition:all .2s;box-shadow:var(--shadow-sm)}
+.alerta-card:hover{transform:translateX(3px);box-shadow:var(--shadow-md)}
+.alerta-card.warn{border-left-color:var(--warn)}
+.alerta-icon{font-size:24px;flex-shrink:0}
+.alerta-info{flex:1}
+.alerta-title{font-weight:700;color:var(--text);font-size:13px}
+.alerta-desc{font-size:11px;color:var(--text2);margin-top:2px}
+.alerta-fecha{font-size:11px;font-weight:600;margin-top:4px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.50);backdrop-filter:blur(8px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid #E8EEF6;border-radius:22px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;animation:slideIn .3s ease;box-shadow:0 30px 80px rgba(15,23,42,0.18)}
+@keyframes slideIn{from{opacity:0;transform:scale(.95) translateY(-10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #F1F5F9;background:linear-gradient(135deg,#F8FAFF,#F5F3FF)}
+.modal-title{font-family:var(--display);font-size:16px;font-weight:800;color:var(--text)}
+.btn-close{width:30px;height:30px;border-radius:9px;background:#FEF2F2;border:1px solid #FECACA;color:var(--danger);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.btn-close:hover{background:#FEE2E2}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid #F1F5F9;display:flex;gap:10px;justify-content:flex-end;background:#FAFBFC}
+
+/* TOAST */
+#toastContainer{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:9px}
+.toast{background:#fff;border:1px solid #E8EEF6;border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;min-width:240px;max-width:320px;animation:toastIn .3s ease;box-shadow:0 8px 28px rgba(15,23,42,0.14)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.toast.success{border-left:3px solid var(--neon)}
+.toast.error{border-left:3px solid var(--danger)}
+.toast.warn{border-left:3px solid var(--warn)}
+.section-empty{text-align:center;padding:50px 20px;color:var(--text3)}
+.section-empty .e-icon{font-size:52px;margin-bottom:14px;opacity:.35}
+.section-empty p{font-size:13px;color:var(--text3)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MOBILE */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-250px;height:100%;z-index:200;box-shadow:none}
+  .sidebar.mobile-open{left:0;box-shadow:var(--shadow-lg)}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.40);z-index:199}
+  .sidebar-overlay.show{display:block}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .grid-2{grid-template-columns:1fr}
+  .pos-layout{grid-template-columns:1fr;height:auto;display:flex;flex-direction:column-reverse}
+  .pos-cart{max-height:55vh}
+  .cart-items{max-height:150px}
+  #btnCobrar{display:block!important}
+  .page-body{padding:14px 15px}
+  .topbar{padding:0 15px}
+}
+
+/* DARK MODE override (si el usuario activa toggle) */
+[data-theme="dark"]{
+  --bg:#050d1a;--bg2:#081428;--bg3:#0c1e3a;
+  --card:#0a1628;--card2:#0f1e35;
+  --border:rgba(0,200,255,0.12);--border2:rgba(0,200,255,0.28);
+  --text:#e8f4ff;--text2:#7a9fc0;--text3:#3a5f80;
+  --accent:#00c8ff;--accent2:#00a8e8;
+  --neon:#00e5a0;--neon2:#00ffb3;
+  --warn:#ffb347;--danger:#ff4d6d;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.5);
+}
+[data-theme="dark"] .form-input,[data-theme="dark"] .form-select{background:rgba(0,200,255,0.04);border-color:rgba(0,200,255,0.12);color:#e8f4ff}
+[data-theme="dark"] .form-input::placeholder{color:#3a5f80}
+[data-theme="dark"] .sidebar{background:#081428;border-color:rgba(0,200,255,0.12)}
+[data-theme="dark"] .topbar{background:rgba(5,13,26,0.95);border-color:rgba(0,200,255,0.12)}
+[data-theme="dark"] .card{background:#0a1628;border-color:rgba(0,200,255,0.12)}
+[data-theme="dark"] .stat-card{background:#0a1628;border-color:rgba(0,200,255,0.12)}
+[data-theme="dark"] .modal{background:#0a1628;border-color:rgba(0,200,255,0.28)}
+[data-theme="dark"] .modal-header{background:rgba(8,20,40,0.8)}
+[data-theme="dark"] .modal-footer{background:rgba(8,20,40,0.8)}
+[data-theme="dark"] .btn-ghost{border-color:rgba(0,200,255,0.28);color:#7a9fc0}
+[data-theme="dark"] .btn-ghost:hover{border-color:#00c8ff;color:#00c8ff;background:rgba(0,200,255,0.06)}
+[data-theme="dark"] .search-bar{background:rgba(0,200,255,0.04);border-color:rgba(0,200,255,0.12)}
+[data-theme="dark"] .search-bar input{color:#e8f4ff}
+[data-theme="dark"] .pay-btn{background:rgba(0,200,255,0.05);border-color:rgba(0,200,255,0.18);color:#7a9fc0}
+[data-theme="dark"] .pay-btn:hover{border-color:#00c8ff;color:#00c8ff}
+[data-theme="dark"] .pay-btn.selected{background:rgba(0,200,255,0.15);border-color:#00c8ff;color:#00c8ff}
+[data-theme="dark"] table th{background:#081428;color:#3a5f80}
+[data-theme="dark"] td{border-color:rgba(0,200,255,0.05);color:#7a9fc0}
+[data-theme="dark"] tr:hover td{background:rgba(0,200,255,0.03)}
+[data-theme="dark"] .med-card{background:#0a1628;border-color:rgba(0,200,255,0.12)}
+[data-theme="dark"] .med-card:hover{border-color:#00c8ff}
+[data-theme="dark"] .med-price{color:#00e5a0}
+[data-theme="dark"] .cat-btn{background:transparent;border-color:rgba(0,200,255,0.18);color:#7a9fc0}
+[data-theme="dark"] .cat-btn.active{background:rgba(0,200,255,0.15);border-color:#00c8ff;color:#00c8ff}
+[data-theme="dark"] .user-info{background:rgba(0,200,255,0.05);border-color:rgba(0,200,255,0.18)}
+[data-theme="dark"] .toast{background:#0a1628;border-color:rgba(0,200,255,0.18)}
+[data-theme="dark"] .cart-header{background:rgba(8,20,40,0.8)}
+[data-theme="dark"] .cart-footer{background:rgba(8,20,40,0.6)}
+[data-theme="dark"] .cart-item{background:#0c1e3a;border-color:rgba(0,200,255,0.12)}
+[data-theme="dark"] .qty-btn{background:#081428;border-color:rgba(0,200,255,0.2);color:#00c8ff}
+[data-theme="dark"] #btnCobrar{background:linear-gradient(135deg,#00e5a0,#00c8ff);color:#050d1a}
+[data-theme="dark"] .nav-item.active{background:linear-gradient(135deg,rgba(0,200,255,0.15),rgba(0,229,160,0.08));color:#00c8ff}
+[data-theme="dark"] .nav-item:hover{background:rgba(0,200,255,0.07);color:#e8f4ff}
+[data-theme="dark"] .login-card{background:linear-gradient(145deg,rgba(10,22,40,.95),rgba(15,30,53,.95));border-color:rgba(0,200,255,0.28)}
+[data-theme="dark"] #loginScreen{background:linear-gradient(135deg,#050d1a,#081428)}
+[data-theme="dark"] .badge-blue{background:rgba(0,200,255,0.15);color:#00c8ff;border-color:rgba(0,200,255,0.3)}
+[data-theme="dark"] .badge-green{background:rgba(0,229,160,0.15);color:#00e5a0;border-color:rgba(0,229,160,0.3)}
+[data-theme="dark"] .badge-warn{background:rgba(255,179,71,0.15);color:#ffb347;border-color:rgba(255,179,71,0.3)}
+[data-theme="dark"] .badge-red{background:rgba(255,77,109,0.15);color:#ff4d6d;border-color:rgba(255,77,109,0.3)}
+[data-theme="dark"] .pos-cart{background:#0a1628;border-color:rgba(0,200,255,0.12)}
+[data-theme="dark"] .form-input:focus,[data-theme="dark"] .form-select:focus{border-color:#00c8ff;box-shadow:0 0 0 3px rgba(0,200,255,0.1)}
+</style>
+
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-canvas" id="loginCanvas"></div>
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="login-logo-icon">&#x1F48A;</div>
+      <div class="login-brand">FARMACIA PRO<span>Sistema de Gestion Farmaceutica v1.0</span></div>
+    </div>
+    <div class="login-card">
+      <div class="login-badge">Licencia Protegida - No Transferible</div>
+      <div id="loginAlert"></div>
+      <div class="form-group">
+        <label class="form-label">Nombre de la Farmacia</label>
+        <input type="text" id="ln-negocio" class="form-input" placeholder="Farmacia San Jose...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Usuario</label>
+        <input type="text" id="ln-user" class="form-input" placeholder="usuario@farmacia.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contrasena</label>
+        <input type="password" id="ln-pass" class="form-input" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Codigo de Activacion</label>
+        <input type="text" id="ln-code" class="form-input" placeholder="FARM-XXXX-XXXX" style="font-family:monospace;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="device-info">
+        Tu codigo esta ligado a este dispositivo.
+        <div class="device-id-display" id="deviceIdDisplay">Cargando ID...</div>
+      </div>
+      <button class="btn btn-neon btn-full btn-lg" onclick="doLogin()" style="font-size:15px">Activar y Entrar</button>
+      <div style="text-align:center;margin-top:12px">
+        <button onclick="abrirAdminModal()" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;font-family:var(--font)">Panel Admin A2K</button>
+      </div>
+    </div>
+    <!-- Admin panel generador debajo del login card -->
+    <div id="adminLicPanel" style="display:none;margin-top:12px">
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:18px">
+        <div class="card-title mb-3" style="color:var(--accent)">Panel Admin A2K - Licencias</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button onclick="switchLicTab('pro')" id="tabPro" class="btn btn-primary" style="flex:1;font-size:12px">PRO</button>
+          <button onclick="switchLicTab('demo')" id="tabDemo" class="btn btn-ghost" style="flex:1;font-size:12px">DEMO</button>
+        </div>
+        <div id="panelLicPro">
+          <div class="form-group"><label class="form-label">Nombre de la Farmacia</label><input type="text" id="lic-negocio" class="form-input" placeholder="Farmacia La Salud..."></div>
+          <div class="grid-2">
+            <div class="form-group"><label class="form-label">Terminales</label><select id="lic-terminales" class="form-select"><option value="1">1 terminal</option><option value="2" selected>2 terminales</option><option value="3">3 terminales</option></select></div>
+            <div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-primary btn-full" onclick="generarLicencia()" style="height:42px">Generar PRO</button></div>
+          </div>
+          <div id="lic-resultado" style="display:none;background:var(--bg3);border:2px solid var(--neon);border-radius:11px;padding:13px;margin-top:10px">
+            <div style="font-size:10px;color:var(--text2);margin-bottom:4px">Codigo PRO generado:</div>
+            <div id="lic-code-display" style="font-family:monospace;font-size:18px;font-weight:900;color:var(--neon);letter-spacing:2px"></div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px" id="lic-info-display"></div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn btn-primary" onclick="compartirUltimaLicencia()" style="flex:1;font-size:12px">WhatsApp</button>
+              <button class="btn btn-ghost btn-sm" onclick="copiarCodigo()" style="flex:1;font-size:12px">Copiar</button>
+            </div>
+          </div>
+        </div>
+        <div id="panelLicDemo" style="display:none">
+          <div class="form-group"><label class="form-label">Nombre de la Farmacia</label><input type="text" id="demo-negocio" class="form-input" placeholder="Farmacia La Salud..."></div>
+          <div class="grid-2">
+            <div class="form-group"><label class="form-label">Duracion Demo</label><select id="demo-dias" class="form-select" onchange="actualizarFechaDemo()"><option value="1">1 dia</option><option value="2">2 dias</option><option value="3" selected>3 dias</option><option value="5">5 dias</option><option value="7">7 dias</option></select></div>
+            <div class="form-group"><label class="form-label">Vence el</label><input type="text" id="demo-fecha-vence" class="form-input" readonly style="background:var(--bg3);color:var(--warn);font-weight:700;text-align:center"></div>
+          </div>
+          <div style="background:var(--bg3);border-radius:9px;padding:10px 12px;margin-bottom:11px;font-size:12px;color:var(--text2)">Demo por <strong id="demo-dias-label" style="color:var(--warn)">3 dias</strong>. Al vencer datos seguros. Solo activa con PRO.</div>
+          <button class="btn btn-full" onclick="generarLicenciaDemo()" style="background:linear-gradient(135deg,#ffb347,#ff4d6d);font-weight:700;height:42px;font-size:13px">Generar Codigo DEMO</button>
+          <div id="demo-resultado" style="display:none;background:var(--bg3);border:2px solid var(--warn);border-radius:11px;padding:13px;margin-top:10px">
+            <div style="font-size:10px;color:var(--text2);margin-bottom:4px">Codigo DEMO generado:</div>
+            <div id="demo-code-display" style="font-family:monospace;font-size:18px;font-weight:900;color:var(--warn);letter-spacing:2px"></div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px" id="demo-info-display"></div>
+            <button class="btn btn-full" onclick="compartirUltimaDemo()" style="background:#25D366;color:#fff;font-weight:700;margin-top:10px;font-size:12px">Enviar por WhatsApp</button>
+          </div>
+        </div>
+        <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+          <div style="font-size:10px;font-weight:700;color:var(--text2);margin-bottom:8px;letter-spacing:1.5px">LICENCIAS GENERADAS</div>
+          <div id="licTable"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+<div class="app-wrap">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">&#x1F48A;</div>
+      <div class="sidebar-logo-text">FARMACIA PRO<span>A2K Digital Studio</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item" onclick="showPage('pos')"><span class="nav-icon">🛒</span> Punto de Venta</div>
+      <div class="nav-section">Gestion</div>
+      <div class="nav-item" onclick="showPage('inventario')"><span class="nav-icon">💊</span> Inventario</div>
+      <div class="nav-item" onclick="showPage('alertas')"><span class="nav-icon">🔔</span> Alertas<span class="nav-badge" id="alertaBadge" style="display:none">0</span></div>
+      <div class="nav-item" onclick="showPage('recetas')"><span class="nav-icon">📋</span> Recetas</div>
+      <div class="nav-section">Administracion</div>
+      <div class="nav-item" onclick="showPage('clientes')"><span class="nav-icon">👥</span> Clientes</div>
+      <div class="nav-item" onclick="showPage('historial')"><span class="nav-icon">📜</span> Historial</div>
+      <div class="nav-item" onclick="showPage('proveedores')"><span class="nav-icon">🚚</span> Proveedores</div>
+      <div class="nav-item" onclick="showPage('reportes')"><span class="nav-icon">📈</span> Reportes</div>
+      <div class="nav-section">Sistema</div>
+      <div class="nav-item" onclick="showPage('configuracion')"><span class="nav-icon">⚙️</span> Configuracion</div>
+      <div class="nav-item" onclick="doLogout()"><span class="nav-icon">🚪</span> Cerrar Sesion</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info" onclick="showPage('configuracion')">
+        <div class="user-avatar" id="userAvatar">F</div>
+        <div><div class="user-name" id="userName">Farmacia</div><div class="user-role">Administrador</div></div>
+      </div>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <button onclick="toggleMobileSidebar()" style="display:none;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;margin-right:8px" id="mobileMenuBtn">&#9776;</button>
+        <span class="topbar-title" id="pageTitle">Dashboard</span>
+        <div class="topbar-sub" id="pageDate"></div>
+      </div>
+      <div class="topbar-actions">
+        <div id="onlineIndicator" style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.3);color:#00e5a0">
+          <span id="onlineDot" style="width:7px;height:7px;border-radius:50%;background:#00e5a0;display:inline-block"></span>
+          <span id="onlineText">Online</span>
+        </div>
+        <div class="topbar-alert" id="topbarAlert" style="display:none" onclick="showPage('alertas')">
+          <span>&#x26A0;&#xFE0F;</span><span id="topbarAlertText">0 alertas</span>
+        </div>
+        <button onclick="mostrarCierreDiario()" style="background:rgba(0,200,255,.08);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;padding:6px 10px;cursor:pointer;font-family:var(--font)">&#x1F4CA; Cierre</button>
+        <div class="theme-toggle" onclick="toggleTheme()">&#x1F319;</div>
+        <div style="font-size:11px;color:var(--text2)" id="userName2"></div>
+      </div>
+    </div>
+    <div class="page-body" id="pageBody">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard">
+        <div class="stats-grid" id="dashStats"></div>
+        <div class="grid-2">
+          <div class="card"><div class="card-title mb-3">Ventas Ultimos 7 Dias</div><canvas id="chartVentas" height="200"></canvas></div>
+          <div class="card"><div class="card-title mb-3">Alertas Criticas</div><div id="dashAlertas"></div></div>
+        </div>
+        <div class="grid-2 mt-4">
+          <div class="card"><div class="card-title mb-3">Top Medicamentos</div><div id="dashTopMeds"></div></div>
+          <div class="card"><div class="card-title mb-3">Ultimas Ventas</div><div id="dashUltVentas"></div></div>
+        </div>
+      </div>
+
+      <!-- POS -->
+      <div id="page-pos" style="display:none">
+        <div class="pos-layout">
+          <div class="pos-products">
+            <div class="search-bar"><span>&#x1F50D;</span><input type="text" id="posSearch" placeholder="Buscar medicamento..." oninput="renderPOS()"></div>
+            <div class="cat-filters" id="posCats"></div>
+            <div class="meds-grid" id="posGrid"></div>
+          </div>
+          <div class="pos-cart">
+            <div class="cart-header">
+              <div class="flex justify-between items-center"><h3 style="font-family:var(--display);font-size:14px">Carrito</h3><button class="btn btn-sm btn-ghost" onclick="clearCart()">Limpiar</button></div>
+              <div style="font-size:11px;color:var(--text2);margin-top:3px" id="cartCount">0 productos</div>
+            </div>
+            <div class="cart-items" id="cartItems"><div class="section-empty" style="padding:25px 20px"><div class="e-icon">&#x1F48A;</div><p>Agrega medicamentos</p></div></div>
+            <div class="cart-footer">
+              <div class="flex justify-between items-center mb-2"><span style="font-size:11px;color:var(--text2)">TOTAL</span><span class="cart-total" id="cartTotal">$0.00</span></div>
+              <div class="cart-total-bs" id="cartTotalBs">Bs 0.00</div>
+              <div class="pay-btns" id="paymentBtns"></div>
+              <div id="noPayMethodMsg" style="font-size:11px;color:var(--text2);text-align:center;margin-bottom:7px">Selecciona metodo de pago</div>
+              <button id="btnCobrar" onclick="procesarVenta()" style="display:block">COBRAR</button>
+              <div style="margin-top:8px"><input type="text" id="clientePOS" class="form-input" placeholder="Cliente (opcional)..." style="font-size:12px;padding:8px 11px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVENTARIO -->
+      <div id="page-inventario" style="display:none">
+        <div class="flex justify-between items-center mb-4">
+          <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Inventario</h2><div style="font-size:12px;color:var(--text2)">Gestion de medicamentos y stock</div></div>
+          <button class="btn btn-primary" onclick="openAddMed()">+ Nuevo Medicamento</button>
+        </div>
+        <div class="card mb-4"><div style="display:flex;gap:11px;flex-wrap:wrap">
+          <div class="search-bar" style="flex:1;margin-bottom:0"><span>&#x1F50D;</span><input type="text" id="invSearch" placeholder="Buscar medicamento..." oninput="renderInventario()"></div>
+          <select id="invCat" class="form-select" style="width:150px" onchange="renderInventario()"><option value="">Todas las categorias</option></select>
+          <select id="invStock" class="form-select" style="width:130px" onchange="renderInventario()"><option value="">Todo el stock</option><option value="ok">Normal</option><option value="bajo">Stock bajo</option><option value="agotado">Agotado</option><option value="vence">Vence pronto</option></select>
+        </div></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>Medicamento</th><th>Categoria</th><th>Lote</th><th>Vencimiento</th><th>P. Costo</th><th>P. Venta $</th><th id="th-local">P. Venta Local</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="invTable"></tbody></table></div></div>
+      </div>
+
+      <!-- ALERTAS -->
+      <div id="page-alertas" style="display:none">
+        <div class="flex justify-between items-center mb-4">
+          <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Alertas</h2><div style="font-size:12px;color:var(--text2)">Vencimientos y stock critico</div></div>
+        </div>
+        <div id="alertasContent"></div>
+      </div>
+
+      <!-- RECETAS -->
+      <div id="page-recetas" style="display:none">
+        <div class="flex justify-between items-center mb-4">
+          <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Recetas Medicas</h2></div>
+          <button class="btn btn-primary" onclick="openAddReceta()">+ Nueva Receta</button>
+        </div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>Fecha</th><th>Paciente</th><th>Medico</th><th>Medicamentos</th><th>Acciones</th></tr></thead><tbody id="recetasTable"></tbody></table></div></div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div id="page-clientes" style="display:none">
+        <div class="flex justify-between items-center mb-4">
+          <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Clientes</h2></div>
+          <button class="btn btn-primary" onclick="openAddCliente()">+ Nuevo Cliente</button>
+        </div>
+        <div class="card">
+          <div class="search-bar mb-3"><span>&#x1F50D;</span><input type="text" id="clienteSearch" placeholder="Buscar cliente..." oninput="renderClientes()"></div>
+          <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Telefono</th><th>CI</th><th>Deuda</th><th>Ultima Compra</th><th>Acciones</th></tr></thead><tbody id="clientesTable"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div id="page-historial" style="display:none">
+        <div class="flex justify-between items-center mb-4">
+          <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Historial de Ventas</h2></div>
+        </div>
+        <div class="stats-grid" id="histStats"></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>Fecha</th><th>Productos</th><th>Metodo</th><th>Total $</th><th>Total Local</th><th>Acciones</th></tr></thead><tbody id="histTable"></tbody></table></div></div>
+      </div>
+
+      <!-- PROVEEDORES -->
+      <div id="page-proveedores" style="display:none">
+        <div class="flex justify-between items-center mb-4">
+          <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Proveedores</h2></div>
+          <button class="btn btn-primary" onclick="openAddProveedor()">+ Nuevo Proveedor</button>
+        </div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>Laboratorio</th><th>Contacto</th><th>Telefono</th><th>Especialidad</th><th>Acciones</th></tr></thead><tbody id="provTable"></tbody></table></div></div>
+      </div>
+
+      <!-- REPORTES -->
+      <div id="page-reportes" style="display:none">
+        <div class="flex justify-between items-center mb-4">
+          <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Reportes</h2></div>
+        </div>
+        <div class="stats-grid" id="reporteStats"></div>
+        <div class="grid-2">
+          <div class="card"><div class="card-title mb-3">Ventas por Categoria</div><canvas id="chartCategorias" height="250"></canvas></div>
+          <div class="card"><div class="card-title mb-3">Top Medicamentos</div><div id="topMedsReporte"></div></div>
+        </div>
+      </div>
+
+      <!-- CONFIGURACION -->
+      <div id="page-configuracion" style="display:none">
+        <div class="flex justify-between items-center mb-4">
+          <div><h2 style="font-family:var(--display);font-size:20px;font-weight:700">Configuracion</h2></div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="card mb-4">
+              <div class="card-title mb-3">Informacion de la Farmacia</div>
+              <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="cfg-negocio" class="form-input"></div>
+              <div class="form-group"><label class="form-label">Direccion</label><input type="text" id="cfg-direccion" class="form-input"></div>
+              <div class="form-group"><label class="form-label">Telefono</label><input type="text" id="cfg-telefono" class="form-input"></div>
+              <div class="form-group"><label class="form-label">RIF/NIT</label><input type="text" id="cfg-rif" class="form-input"></div>
+              <button class="btn btn-primary" onclick="saveConfig()">Guardar</button>
+            </div>
+            <div class="card mb-4">
+              <div class="card-title mb-3">Pais y Moneda</div>
+              <div class="form-group"><label class="form-label">Pais</label>
+                <select id="cfg-pais" class="form-select" onchange="aplicarPais(this.value)">
+                  <option value="VE">Venezuela - Bolivar (Bs)</option>
+                  <option value="CO">Colombia - Peso (COP)</option>
+                  <option value="PE">Peru - Sol (S/)</option>
+                  <option value="EC">Ecuador - Dolar</option>
+                  <option value="BO">Bolivia - Boliviano (Bs.)</option>
+                  <option value="PA">Panama - Dolar</option>
+                  <option value="DO">Rep. Dominicana - Peso (RD$)</option>
+                </select>
+              </div>
+              <div style="background:var(--bg3);border-radius:9px;padding:9px 13px;margin-bottom:13px;font-size:13px">
+                <span id="pais-bandera-display" style="font-weight:700;color:var(--neon)">Venezuela</span>
+                <span style="color:var(--text2)"> - Moneda: </span>
+                <span id="pais-moneda-display" style="color:var(--warn);font-weight:700">Bs (Bolivar)</span>
+              </div>
+              <div class="form-group"><label class="form-label" id="lbl-tasa-local">Tasa BCV (Bs por $1)</label><input type="number" id="cfg-tasa" class="form-input" step="0.01" placeholder="649.00"></div>
+              <button class="btn btn-primary" onclick="saveTasa()">Actualizar Tasa</button>
+            </div>
+          </div>
+          <div>
+            <div class="card mb-4">
+              <div class="card-title mb-3">Metodos de Pago</div>
+              <div id="payMethodsConfig"></div>
+              <button class="btn btn-ghost btn-sm mt-3" onclick="savePayMethods()">Guardar Metodos</button>
+            </div>
+            <div class="card mb-4">
+              <div class="card-title mb-3">Licencia</div>
+              <div style="font-size:13px;color:var(--text2);margin-bottom:6px">Tipo: <strong id="licTipo" style="color:var(--neon)">PRO</strong></div>
+              <div style="font-size:11px;color:var(--text3)" id="licenseDeviceId">Device ID: cargando...</div>
+              <div style="margin-top:10px"><button onclick="abrirAdminModal()" class="btn btn-ghost btn-sm btn-full">Panel Admin A2K</button></div>
+            </div>
+            <div class="card" style="border:2px solid var(--danger)">
+              <div class="card-title mb-2" style="color:var(--danger)">Zona de Peligro</div>
+              <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Acciones irreversibles.</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-danger" onclick="resetearDatos()">Borrar Ventas</button>
+                <button class="btn btn-danger" onclick="resetearTodo()">Resetear Todo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- TOAST -->
+<div id="toastContainer"></div>
+
+<!-- MODAL COBRO CON VUELTO Y PAGO MIXTO -->
+<div class="modal-overlay" id="modalCobro">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <span class="modal-title">&#x1F4B3; Confirmar Cobro</span>
+      <button class="btn-close" onclick="closeModal('modalCobro')">x</button>
+    </div>
+    <div class="modal-body">
+      <div id="cobroResumen" style="background:var(--bg2);border-radius:11px;padding:13px;margin-bottom:14px"></div>
+      <div class="form-group">
+        <label class="form-label">Metodo de Pago</label>
+        <div id="cobroMetodos" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+      </div>
+      <div id="pagoMixtoPanel" style="display:none">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;margin-bottom:8px">PAGO MIXTO</div>
+        <div id="pagosMixtosList"></div>
+        <button onclick="agregarPagoMixto()" class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px">+ Agregar Metodo</button>
+        <div id="remanenteMixto" style="margin-top:10px;padding:9px;border-radius:9px;background:var(--bg3);font-size:13px;font-weight:700;text-align:center"></div>
+      </div>
+      <div class="form-group" id="montoRecibidoGroup">
+        <label class="form-label">Monto Recibido ($) — Para calcular vuelto</label>
+        <input type="number" id="montoRecibido" class="form-input" placeholder="0.00" step="0.01" oninput="calcularVuelto()">
+      </div>
+      <div id="vueltoDisplay" style="display:none;background:var(--bg2);border-radius:11px;padding:13px;margin-bottom:10px">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:5px">VUELTO</div>
+        <div id="vueltoDolares" style="font-size:22px;font-weight:900;color:var(--neon)"></div>
+        <div id="vueltoBolivares" style="font-size:13px;color:var(--text2);margin-top:3px"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cliente (Opcional)</label>
+        <input type="text" id="cobroCliente" class="form-input" placeholder="Nombre del paciente...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalCobro')">Cancelar</button>
+      <button class="btn btn-neon" onclick="confirmarCobroFinal()">&#x2705; Confirmar Venta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TICKET/RECIBO -->
+<div class="modal-overlay" id="modalTicket">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <span class="modal-title">&#x1F9FE; Recibo de Venta</span>
+      <button class="btn-close" onclick="closeModal('modalTicket')">x</button>
+    </div>
+    <div class="modal-body">
+      <div id="ticketContent" style="font-family:monospace;font-size:13px;background:var(--bg2);border-radius:11px;padding:16px;line-height:1.7"></div>
+    </div>
+    <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
+      <button class="btn btn-ghost" onclick="closeModal('modalTicket')">Cerrar</button>
+      <button class="btn btn-primary" onclick="imprimirTicket58mm()">&#x1F5A8;&#xFE0F; Imprimir 58mm</button>
+      <button class="btn btn-neon" onclick="enviarTicketWhatsApp()" style="background:#25D366;color:#fff">&#x1F4F1; WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CIERRE DIARIO -->
+<div class="modal-overlay" id="modalCierre">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <span class="modal-title">&#x1F4CA; Cierre del Dia</span>
+      <button class="btn-close" onclick="closeModal('modalCierre')">x</button>
+    </div>
+    <div class="modal-body">
+      <div id="cierreContent"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalCierre')">Cerrar</button>
+      <button class="btn btn-neon" onclick="enviarCierreWhatsApp()" style="background:#25D366;color:#fff">&#x1F4F1; Enviar por WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL ADMIN PASSWORD — GLOBAL (fuera de login y app) ══ -->
+<div id="modalAdminPw" style="display:none;position:fixed;inset:0;background:rgba(5,13,26,0.92);z-index:99999;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:2px solid var(--accent);border-radius:20px;padding:32px;width:90%;max-width:360px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6)">
+    <div style="font-size:42px;margin-bottom:14px">&#x1F510;</div>
+    <h3 style="color:var(--accent);margin:0 0 6px;font-family:var(--display);font-size:18px">Panel Admin A2K</h3>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:20px">Ingresa la contrasena de administrador</p>
+    <input type="password" id="adminPwInput" class="form-input" placeholder="Contrasena admin" style="margin-bottom:10px;text-align:center;font-size:15px">
+    <div id="adminPwError" style="color:var(--danger);font-size:12px;margin-bottom:10px;display:none">Contrasena incorrecta</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="cerrarModalAdmin()" class="btn btn-ghost" style="flex:1">Cancelar</button>
+      <button id="adminPwOkBtn" class="btn btn-primary" style="flex:1">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: MEDICAMENTO -->
+<div class="modal-overlay" id="modalMed">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header"><span class="modal-title" id="modalMedTitle">Nuevo Medicamento</span><button class="btn-close" onclick="closeModal('modalMed')">x</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="med-id">
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Nombre / Marca *</label><input type="text" id="med-nombre" class="form-input" placeholder="Paracetamol 500mg"></div>
+        <div class="form-group"><label class="form-label">Principio Activo</label><input type="text" id="med-activo" class="form-input" placeholder="Acetaminofen"></div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Categoria *</label>
+          <select id="med-categoria" class="form-select" onchange="autoEmojiMed(this.value)">
+            <option value="Analgesicos">Analgesicos</option><option value="Antibioticos">Antibioticos</option>
+            <option value="Antiinflamatorios">Antiinflamatorios</option><option value="Vitaminas">Vitaminas</option>
+            <option value="Cardiovascular">Cardiovascular</option><option value="Diabetes">Diabetes</option>
+            <option value="Respiratorio">Respiratorio</option><option value="Digestivo">Digestivo</option>
+            <option value="Dermatologico">Dermatologico</option><option value="Pediatrico">Pediatrico</option>
+            <option value="Antiparasitarios">Antiparasitarios</option><option value="Oftalmologia">Oftalmologia</option>
+            <option value="Ginecologia">Ginecologia</option><option value="Neurologia">Neurologia</option>
+            <option value="Higiene">Higiene</option><option value="Otros">Otros</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Emoji / Icono</label><input type="text" id="med-emoji" class="form-input" maxlength="4" style="font-size:20px;text-align:center;width:70px"></div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Presentacion</label>
+          <select id="med-presentacion" class="form-select">
+            <option>Caja x10 tabletas</option><option>Caja x20 tabletas</option><option>Caja x30 tabletas</option>
+            <option>Frasco 120ml</option><option>Frasco 240ml</option><option>Ampolla</option>
+            <option>Crema 30g</option><option>Gotas 15ml</option><option>Inyectable</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Codigo / Barras</label><input type="text" id="med-codigo" class="form-input"></div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Numero de Lote</label><input type="text" id="med-lote" class="form-input" placeholder="LOT-2024-001"></div>
+        <div class="form-group"><label class="form-label">Fecha de Vencimiento *</label><input type="date" id="med-vencimiento" class="form-input"></div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Ubicacion en Estante</label><input type="text" id="med-ubicacion" class="form-input" placeholder="Estante A-3"></div>
+        <div class="form-group"><label class="form-label">Requiere Receta</label>
+          <select id="med-receta" class="form-select"><option value="no">No requiere</option><option value="si">Requiere receta</option><option value="control">Control especial</option></select>
+        </div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:11px">
+        <div style="color:var(--accent);font-weight:700;font-size:13px;margin-bottom:9px">Precios y Stock</div>
+        <div class="grid-2">
+          <div class="form-group" style="margin-bottom:7px"><label class="form-label">Precio Costo ($)</label><input type="number" id="med-costo" class="form-input" step="0.01" placeholder="0.00" oninput="calcPrecioMed()"></div>
+          <div class="form-group" style="margin-bottom:7px"><label class="form-label">% Ganancia</label>
+            <div style="display:flex;gap:5px">
+              <input type="number" id="med-ganancia" class="form-input" placeholder="20" oninput="calcPrecioMed()" style="flex:1">
+              <button type="button" onclick="setGanancia(20)" style="background:#333;color:#fff;border:none;border-radius:7px;padding:4px 7px;cursor:pointer;font-size:11px">20%</button>
+              <button type="button" onclick="setGanancia(30)" style="background:var(--accent);color:#050d1a;border:none;border-radius:7px;padding:4px 7px;cursor:pointer;font-size:11px">30%</button>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group" style="margin-bottom:7px"><label class="form-label">Precio Venta ($)</label><input type="number" id="med-precio" class="form-input" step="0.01" oninput="calcBsMed()"></div>
+          <div class="form-group" style="margin-bottom:7px"><label class="form-label" id="lbl-precio-local">Precio Local</label><input type="text" id="med-precio-local" class="form-input" readonly style="background:var(--bg3);color:var(--neon);font-weight:700"></div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group" style="margin-bottom:0"><label class="form-label">Stock Actual</label><input type="number" id="med-stock" class="form-input" placeholder="0" min="0"></div>
+          <div class="form-group" style="margin-bottom:0"><label class="form-label">Stock Minimo</label><input type="number" id="med-stockMin" class="form-input" placeholder="5" min="0"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalMed')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMed()">Guardar Medicamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RECETA -->
+<div class="modal-overlay" id="modalReceta">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header"><span class="modal-title">Nueva Receta Medica</span><button class="btn-close" onclick="closeModal('modalReceta')">x</button></div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Paciente *</label><input type="text" id="rec-paciente" class="form-input"></div>
+        <div class="form-group"><label class="form-label">CI / Cedula</label><input type="text" id="rec-ci" class="form-input"></div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Medico</label><input type="text" id="rec-medico" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Fecha</label><input type="date" id="rec-fecha" class="form-input"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Medicamentos Prescritos</label><textarea id="rec-meds" class="form-input" rows="3" placeholder="Paracetamol 500mg cada 8h..."></textarea></div>
+      <div class="form-group"><label class="form-label">Notas / Diagnostico</label><textarea id="rec-notas" class="form-input" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalReceta')">Cancelar</button><button class="btn btn-primary" onclick="saveReceta()">Guardar Receta</button></div>
+  </div>
+</div>
+
+<!-- MODAL: CLIENTE -->
+<div class="modal-overlay" id="modalCliente">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><span class="modal-title" id="modalClienteTitle">Nuevo Cliente</span><button class="btn-close" onclick="closeModal('modalCliente')">x</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="cli-id">
+      <div class="form-group"><label class="form-label">Nombre Completo *</label><input type="text" id="cli-nombre" class="form-input"></div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Telefono</label><input type="text" id="cli-tel" class="form-input"></div>
+        <div class="form-group"><label class="form-label">CI / Cedula</label><input type="text" id="cli-ci" class="form-input"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Limite de Fiado ($)</label><input type="number" id="cli-limite" class="form-input" value="20"></div>
+      <div class="form-group"><label class="form-label">Notas</label><input type="text" id="cli-notas" class="form-input" placeholder="Alergias, condiciones..."></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalCliente')">Cancelar</button><button class="btn btn-primary" onclick="saveCliente()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: PROVEEDOR -->
+<div class="modal-overlay" id="modalProv">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><span class="modal-title">Nuevo Proveedor</span><button class="btn-close" onclick="closeModal('modalProv')">x</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="prov-id">
+      <div class="form-group"><label class="form-label">Laboratorio / Empresa *</label><input type="text" id="prov-nombre" class="form-input"></div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">Contacto</label><input type="text" id="prov-contacto" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Telefono</label><input type="text" id="prov-tel" class="form-input"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Especialidad</label><input type="text" id="prov-especialidad" class="form-input" placeholder="Antibioticos, Vitaminas..."></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalProv')">Cancelar</button><button class="btn btn-primary" onclick="saveProveedor()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- MODAL: LOGOUT -->
+<div class="modal-overlay" id="modalLogout">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-header"><span class="modal-title">Cerrar Sesion</span><button class="btn-close" onclick="closeModal('modalLogout')">x</button></div>
+    <div class="modal-body" style="text-align:center;padding:28px"><div style="font-size:44px;margin-bottom:11px">&#x1F6AA;</div><p style="color:var(--text2)">Seguro que quieres cerrar sesion?</p></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalLogout')">Cancelar</button><button class="btn btn-danger" onclick="confirmarLogout()">Cerrar Sesion</button></div>
+  </div>
+</div>
+
+<script type="text/javascript">
+// ═══════════════════════════════════════════════════════════════
+//  FARMACIA PRO v1.0 — A2K Digital Studio © 2026
+// ═══════════════════════════════════════════════════════════════
+
+// STORAGE
+var _memDB={};
+var _lsOK=(function(){try{localStorage.setItem('_fp_t','1');localStorage.removeItem('_fp_t');return true;}catch(e){return false;}})();
+const DB={
+  get:function(k){try{if(_lsOK)return JSON.parse(localStorage.getItem('fp_'+k));return _memDB['fp_'+k]||null;}catch(e){return _memDB['fp_'+k]||null;}},
+  set:function(k,v){try{if(_lsOK)localStorage.setItem('fp_'+k,JSON.stringify(v));_memDB['fp_'+k]=v;}catch(e){_memDB['fp_'+k]=v;}},
+  del:function(k){try{if(_lsOK)localStorage.removeItem('fp_'+k);delete _memDB['fp_'+k];}catch(e){delete _memDB['fp_'+k];}},
+};
+
+// DEVICE ID
+function getDeviceId(){
+  try{var s=DB.get('device_id');if(s)return s;
+    var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    function r4(){var x='';for(var i=0;i<4;i++)x+=c[Math.floor(Math.random()*c.length)];return x;}
+    var id='DEV-'+r4()+'-'+r4();DB.set('device_id',id);return id;
+  }catch(e){return 'DEV-FARM-0001';}
+}
+const DEVICE_ID=getDeviceId();
+
+// LICENCIAS
+const CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const SECRET_PRO='FP2026A2K';
+const SECRET_DEMO='FPD3MO77';
+function djb2(s){var h=5381;for(var i=0;i<s.length;i++){h=((h<<5)+h)^s.charCodeAt(i);h=h>>>0;}return h;}
+function toB(n,len){var r='',b=CHARS.length;for(var i=0;i<len;i++){r=CHARS[n%b]+r;n=Math.floor(n/b);}return r;}
+function generateLicenseCode(neg){var s1=toB(djb2(neg.toUpperCase()+Date.now().toString()),4);var s2=toB(djb2(s1+SECRET_PRO),4);return 'FARM-'+s1+'-'+s2;}
+function verifyLicenseSignature(code){var p=code.split('-');if(p.length!==3||p[0]!=='FARM')return false;if(p[1].length!==4||p[2].length!==4)return false;return p[2]===toB(djb2(p[1]+SECRET_PRO),4);}
+function generateDemoCode(neg){var s1=toB(djb2(neg.toUpperCase()+Date.now().toString()),4);var s2=toB(djb2(s1+SECRET_DEMO),4);return 'DEMO-'+s1+'-'+s2;}
+function verifyDemoSignature(code){var p=code.split('-');if(p.length!==3||p[0]!=='DEMO')return false;if(p[1].length!==4||p[2].length!==4)return false;return p[2]===toB(djb2(p[1]+SECRET_DEMO),4);}
+function getLicenses(){return DB.get('licenses_issued')||[];}
+function saveLicenses(l){DB.set('licenses_issued',l);}
+
+// PAISES
+const PAISES={
+  VE:{nombre:'Venezuela',bandera:'VE',monedaLocal:'Bs',monedaLocalNombre:'Bolivar',simboloLocal:'Bs',simboloRef:'$',tasaLabel:'Tasa BCV (Bs por $1)',tasaDefault:649,tasaPlaceholder:'649.00',
+    metodos:[{id:'efusd',label:'Efectivo $',icon:'$',currency:'USD'},{id:'efbs',label:'Efectivo Bs',icon:'Bs',currency:'LOCAL'},{id:'pmovil',label:'Pago Movil',icon:'P',currency:'LOCAL'},{id:'pcred',label:'Punto Credito',icon:'C',currency:'LOCAL'},{id:'pdeb',label:'Punto Debito',icon:'D',currency:'LOCAL'},{id:'trans',label:'Transferencia',icon:'T',currency:'LOCAL'},{id:'zelle',label:'Zelle',icon:'Z',currency:'USD'},{id:'binance',label:'Binance Pay',icon:'B',currency:'USD'},{id:'fiado',label:'Fiado',icon:'F',currency:'LOCAL'},{id:'mixto',label:'Mixto',icon:'M',currency:'MIX'}]},
+  CO:{nombre:'Colombia',bandera:'CO',monedaLocal:'COP',monedaLocalNombre:'Peso Colombiano',simboloLocal:'$',simboloRef:'US$',tasaLabel:'TRM (COP por $1)',tasaDefault:4100,tasaPlaceholder:'4100.00',
+    metodos:[{id:'efusd',label:'Efectivo US$',icon:'$',currency:'USD'},{id:'efcop',label:'Efectivo COP',icon:'$',currency:'LOCAL'},{id:'nequi',label:'Nequi',icon:'N',currency:'LOCAL'},{id:'davi',label:'Daviplata',icon:'D',currency:'LOCAL'},{id:'banco',label:'Bancolombia',icon:'B',currency:'LOCAL'},{id:'trans',label:'Transferencia',icon:'T',currency:'LOCAL'},{id:'fiado',label:'Fiado',icon:'F',currency:'LOCAL'},{id:'mixto',label:'Mixto',icon:'M',currency:'MIX'}]},
+  PE:{nombre:'Peru',bandera:'PE',monedaLocal:'PEN',monedaLocalNombre:'Sol Peruano',simboloLocal:'S/',simboloRef:'$',tasaLabel:'Tipo de Cambio (S/ por $1)',tasaDefault:3.75,tasaPlaceholder:'3.75',
+    metodos:[{id:'efusd',label:'Efectivo $',icon:'$',currency:'USD'},{id:'efsol',label:'Efectivo S/',icon:'S/',currency:'LOCAL'},{id:'yape',label:'Yape',icon:'Y',currency:'LOCAL'},{id:'plin',label:'Plin',icon:'P',currency:'LOCAL'},{id:'trans',label:'Transferencia',icon:'T',currency:'LOCAL'},{id:'fiado',label:'Fiado',icon:'F',currency:'LOCAL'},{id:'mixto',label:'Mixto',icon:'M',currency:'MIX'}]},
+  EC:{nombre:'Ecuador',bandera:'EC',monedaLocal:'USD',monedaLocalNombre:'Dolar',simboloLocal:'$',simboloRef:'$',tasaLabel:'Pais dolarizado (tasa=1)',tasaDefault:1,tasaPlaceholder:'1.00',
+    metodos:[{id:'efusd',label:'Efectivo $',icon:'$',currency:'USD'},{id:'trans',label:'Transferencia',icon:'T',currency:'USD'},{id:'deuna',label:'De Una',icon:'D',currency:'USD'},{id:'fiado',label:'Fiado',icon:'F',currency:'USD'}]},
+  BO:{nombre:'Bolivia',bandera:'BO',monedaLocal:'BOB',monedaLocalNombre:'Boliviano',simboloLocal:'Bs.',simboloRef:'$',tasaLabel:'Tipo de Cambio (Bs. por $1)',tasaDefault:6.91,tasaPlaceholder:'6.91',
+    metodos:[{id:'efusd',label:'Efectivo $',icon:'$',currency:'USD'},{id:'efbob',label:'Efectivo Bs.',icon:'Bs.',currency:'LOCAL'},{id:'tigo',label:'Tigo Money',icon:'T',currency:'LOCAL'},{id:'trans',label:'Transferencia',icon:'T',currency:'LOCAL'},{id:'fiado',label:'Fiado',icon:'F',currency:'LOCAL'}]},
+  PA:{nombre:'Panama',bandera:'PA',monedaLocal:'USD',monedaLocalNombre:'Dolar',simboloLocal:'$',simboloRef:'$',tasaLabel:'Pais dolarizado (tasa=1)',tasaDefault:1,tasaPlaceholder:'1.00',
+    metodos:[{id:'efusd',label:'Efectivo $',icon:'$',currency:'USD'},{id:'trans',label:'Transferencia',icon:'T',currency:'USD'},{id:'yappy',label:'Yappy',icon:'Y',currency:'USD'},{id:'fiado',label:'Fiado',icon:'F',currency:'USD'}]},
+  DO:{nombre:'Rep. Dominicana',bandera:'DO',monedaLocal:'DOP',monedaLocalNombre:'Peso Dominicano',simboloLocal:'RD$',simboloRef:'$',tasaLabel:'Tipo de Cambio (RD$ por $1)',tasaDefault:58.5,tasaPlaceholder:'58.50',
+    metodos:[{id:'efusd',label:'Efectivo $',icon:'$',currency:'USD'},{id:'efrd',label:'Efectivo RD$',icon:'RD$',currency:'LOCAL'},{id:'trans',label:'Transferencia',icon:'T',currency:'LOCAL'},{id:'card',label:'Tarjeta',icon:'C',currency:'LOCAL'},{id:'fiado',label:'Fiado',icon:'F',currency:'LOCAL'}]},
+};
+function getPais(){var cfg=DB.get('config')||{};return PAISES[cfg.pais||'VE']||PAISES['VE'];}
+function fmtLocal(v){return (STATE.simboloLocal||'Bs')+' '+fmt(v);}
+
+// STATE
+let STATE={user:null,tasa:649,pais:'VE',simboloLocal:'Bs',simboloRef:'$',cart:[],payMethod:'',currentPage:'dashboard',charts:{}};
+
+// UTILS
+function fmt(n){var x=parseFloat(n)||0;return x.toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtDate(d){return new Date(d).toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function fmtTime(d){return new Date(d).toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});}
+function diasHastaVencer(f){var h=new Date();h.setHours(0,0,0,0);var v=new Date(f+'T00:00:00');return Math.ceil((v-h)/(1000*60*60*24));}
+
+function showToast(msg,tipo){
+  var c=document.getElementById('toastContainer');if(!c)return;
+  var icons={success:'OK',error:'ERR',warn:'AVS'};
+  var t=document.createElement('div');t.className='toast '+(tipo||'success');
+  t.innerHTML='<span>'+(tipo==='success'?'✅':tipo==='error'?'❌':'⚠️')+'</span><span>'+msg+'</span>';
+  c.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(20px)';t.style.transition='all .3s';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},300);},3000);
+}
+function openModal(id){var m=document.getElementById(id);if(m){m.style.display='flex';m.classList.add('show');}}
+function closeModal(id){var m=document.getElementById(id);if(m){m.classList.remove('show');m.style.display='none';}}
+
+// PARTICULAS
+function initParticles(){
+  var canvas=document.getElementById('loginCanvas');if(!canvas)return;
+  var items=['&#x1F48A;','&#x1F489;','&#x1F9EC;','&#x1F52C;','&#x2695;&#xFE0F;','&#x1FA78;','&#x1F3E5;','&#x1F9EA;'];
+  for(var i=0;i<18;i++){
+    var p=document.createElement('div');p.className='medical-particle';
+    p.innerHTML=items[Math.floor(Math.random()*items.length)];
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDelay=Math.random()*8+'s';
+    p.style.animationDuration=(6+Math.random()*6)+'s';
+    p.style.fontSize=(14+Math.random()*16)+'px';
+    canvas.appendChild(p);
+  }
+}
+
+// ── ADMIN MODAL ──
+var _adminUnlocked=false;
+var _ultimaLic=null;
+var _ultimaDemo=null;
+
+function abrirAdminModal(){
+  if(_adminUnlocked){
+    _mostrarPanelAdmin();
+    return;
+  }
+  var m=document.getElementById('modalAdminPw');
+  if(m){
+    m.style.display='flex';
+    setTimeout(function(){
+      var i=document.getElementById('adminPwInput');
+      var e=document.getElementById('adminPwError');
+      if(i){i.value='';i.focus();}
+      if(e)e.style.display='none';
+    },50);
+  }
+}
+function cerrarModalAdmin(){
+  var m=document.getElementById('modalAdminPw');
+  if(m) m.style.display='none';
+}
+function verificarPasswordAdmin(){
+  var inp=document.getElementById('adminPwInput');
+  var pw=inp?inp.value.trim():'';
+  var MASTER_PW=['FARM2026admin','ZYNC2024admin','a2k2026'];
+  if(!MASTER_PW.includes(pw)){
+    var err=document.getElementById('adminPwError');
+    if(err) err.style.display='block';
+    if(inp){inp.value='';inp.focus();}
+    return;
+  }
+  _adminUnlocked=true;
+  cerrarModalAdmin();
+  _mostrarPanelAdmin();
+}
+function _mostrarPanelAdmin(){
+  var p=document.getElementById('adminLicPanel');
+  if(!p)return;
+  var vis=p.style.display==='block';
+  p.style.display=vis?'none':'block';
+  if(!vis){
+    renderLicTable();
+    setTimeout(function(){actualizarFechaDemo();p.scrollIntoView({behavior:'smooth',block:'nearest'});},150);
+    showToast('Panel Admin abierto','success');
+  }
+}
+// Inicializar el botón del modal cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('adminPwOkBtn');
+  if(btn) btn.addEventListener('click',function(){verificarPasswordAdmin();});
+  var pwInp=document.getElementById('adminPwInput');
+  if(pwInp) pwInp.addEventListener('keydown',function(e){if(e.key==='Enter')verificarPasswordAdmin();});
+  initParticles();
+  var dev=document.getElementById('deviceIdDisplay');
+  if(dev) dev.textContent='Tu Device ID: '+DEVICE_ID;
+});
+
+function switchLicTab(tab){
+  var pp=document.getElementById('panelLicPro'),dp=document.getElementById('panelLicDemo');
+  var tp=document.getElementById('tabPro'),td=document.getElementById('tabDemo');
+  if(tab==='pro'){if(pp)pp.style.display='';if(dp)dp.style.display='none';if(tp)tp.className='btn btn-primary';if(td)td.className='btn btn-ghost';}
+  else{if(pp)pp.style.display='none';if(dp)dp.style.display='';if(tp)tp.className='btn btn-ghost';if(td)td.className='btn btn-primary';actualizarFechaDemo();}
+}
+function actualizarFechaDemo(){
+  var el=document.getElementById('demo-dias');var dias=el?parseInt(el.value)||3:3;
+  var vence=new Date();vence.setDate(vence.getDate()+dias);
+  var fel=document.getElementById('demo-fecha-vence');
+  if(fel)fel.value=vence.toLocaleDateString('es-VE',{day:'numeric',month:'short',year:'numeric'});
+  var lbl=document.getElementById('demo-dias-label');if(lbl)lbl.textContent=dias+' dia'+(dias>1?'s':'');
+}
+function generarLicencia(){
+  var neg=document.getElementById('lic-negocio').value.trim();
+  if(!neg)return showToast('Ingresa el nombre de la farmacia','warn');
+  var code=generateLicenseCode(neg);
+  var term=parseInt(document.getElementById('lic-terminales').value)||2;
+  var lic={id:Date.now(),code:code,negocio:neg,tipo:'PRO',maxTerminales:term,devices:[],activo:true,creadoEn:new Date().toISOString()};
+  var lista=getLicenses();lista.push(lic);saveLicenses(lista);_ultimaLic=lic;
+  var res=document.getElementById('lic-resultado');if(res)res.style.display='block';
+  var cd=document.getElementById('lic-code-display');if(cd)cd.textContent=code;
+  var inf=document.getElementById('lic-info-display');if(inf)inf.textContent=neg+' - Max. '+term+' terminal(es)';
+  document.getElementById('lic-negocio').value='';
+  renderLicTable();showToast('Codigo PRO: '+code,'success');
+}
+function generarLicenciaDemo(){
+  var neg=document.getElementById('demo-negocio').value.trim();
+  var dias=parseInt(document.getElementById('demo-dias').value)||3;
+  if(!neg)return showToast('Ingresa el nombre de la farmacia','warn');
+  var code=generateDemoCode(neg);
+  var vence=new Date();vence.setDate(vence.getDate()+dias);
+  var lic={id:Date.now(),code:code,negocio:neg,tipo:'DEMO',dias:dias,creadoEn:new Date().toISOString(),venceEn:vence.toISOString(),activo:true,devices:[]};
+  var lista=getLicenses();lista.push(lic);saveLicenses(lista);_ultimaDemo=lic;
+  var res=document.getElementById('demo-resultado');if(res)res.style.display='block';
+  var cd=document.getElementById('demo-code-display');if(cd)cd.textContent=code;
+  var opts={day:'numeric',month:'long',year:'numeric'};
+  var inf=document.getElementById('demo-info-display');if(inf)inf.textContent=neg+' - Vence: '+vence.toLocaleDateString('es-VE',opts);
+  document.getElementById('demo-negocio').value='';
+  renderLicTable();showToast('Codigo DEMO: '+code,'success');
+}
+function copiarCodigo(){var el=document.getElementById('lic-code-display');if(!el)return;navigator.clipboard.writeText(el.textContent).then(function(){showToast('Codigo copiado','success');});}
+function compartirUltimaLicencia(){
+  if(!_ultimaLic)return;
+  var lineas=['FARMACIA PRO v1.0 - Codigo de Activacion','','Farmacia: '+_ultimaLic.negocio,'Codigo: '+_ultimaLic.code,'Terminales: '+_ultimaLic.maxTerminales,'','Soporte: +58 416 411 7331','A2K Digital Studio'];
+  window.open('https://wa.me/?text='+encodeURIComponent(lineas.join('\n')),'_blank');
+}
+function compartirUltimaDemo(){
+  if(!_ultimaDemo)return;
+  var opts={day:'numeric',month:'long',year:'numeric'};
+  var vence=new Date(_ultimaDemo.venceEn).toLocaleDateString('es-VE',opts);
+  var lineas=['FARMACIA PRO v1.0 - DEMO GRATUITA','','Farmacia: '+_ultimaDemo.negocio,'Codigo DEMO: '+_ultimaDemo.code,'Valido por: '+_ultimaDemo.dias+' dias','Vence el: '+vence,'','Al vencer tus datos quedan seguros. Activa con codigo PRO para continuar.','Soporte: +58 416 411 7331','A2K Digital Studio'];
+  window.open('https://wa.me/?text='+encodeURIComponent(lineas.join('\n')),'_blank');
+}
+function compartirLic(id){var lics=getLicenses();var l=lics.find(function(x){return x.id==id;});if(!l)return;if(l.tipo==='DEMO'){_ultimaDemo=l;compartirUltimaDemo();}else{_ultimaLic=l;compartirUltimaLicencia();}}
+function renderLicTable(){
+  var el=document.getElementById('licTable');if(!el)return;
+  var lics=getLicenses();
+  if(!lics.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px">Sin licencias generadas</div>';return;}
+  el.innerHTML=lics.slice(-5).reverse().map(function(l){
+    var cls=l.tipo==='DEMO'?'badge-warn':'badge-green';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">'
+      +'<span class="badge '+cls+'">'+l.tipo+'</span>'
+      +'<div style="flex:1;font-size:11px"><div style="color:var(--text);font-weight:600">'+l.negocio+'</div>'
+      +'<div style="font-family:monospace;color:var(--accent);font-size:10px">'+l.code+'</div></div>'
+      +'<button onclick="compartirLic('+l.id+')" style="background:none;border:none;cursor:pointer;font-size:13px">&#x1F4E4;</button>'
+      +'</div>';
+  }).join('');
+}
+
+// EMOJIS
+const CAT_EMOJIS={'Analgesicos':'&#x1F48A;','Antibioticos':'&#x1F9A0;','Antiinflamatorios':'&#x1F525;','Vitaminas':'&#x1F31F;','Cardiovascular':'&#x2764;&#xFE0F;','Diabetes':'&#x1FA7A;','Respiratorio':'&#x1FAC1;','Digestivo':'&#x1FAC3;','Dermatologico':'&#x1F9F4;','Pediatrico':'&#x1F476;','Antiparasitarios':'&#x1F41B;','Oftalmologia':'&#x1F441;&#xFE0F;','Ginecologia':'&#x1F338;','Neurologia':'&#x1F9E0;','Higiene':'&#x1F9FC;','Otros':'&#x1F4E6;'};
+function autoEmojiMed(cat){var el=document.getElementById('med-emoji');if(el&&!el.value.trim()&&CAT_EMOJIS[cat])el.value=CAT_EMOJIS[cat];}
+
+// LOGIN
+function showLoginAlert(msg,tipo){var el=document.getElementById('loginAlert');if(!el)return;el.textContent=msg;el.className=tipo||'error';el.style.display='block';setTimeout(function(){el.style.display='none';},4000);}
+function doLogin(){
+  var negocio=document.getElementById('ln-negocio').value.trim();
+  var user=document.getElementById('ln-user').value.trim();
+  var pass=document.getElementById('ln-pass').value;
+  var code=document.getElementById('ln-code').value.trim().toUpperCase();
+  if(!negocio||!user||!pass)return showLoginAlert('Completa todos los campos','error');
+  if(!code)return showLoginAlert('Ingresa tu codigo de activacion','error');
+  var MASTER=['FARM-ABIG-2024','FARM-ZYNC-2024'];
+  var savedLic=DB.get('license');
+  if(savedLic&&savedLic.deviceId===DEVICE_ID){
+    if(savedLic.code===code){doStartApp(negocio,user);return;}
+    var eM=MASTER.includes(code),eFP=verifyLicenseSignature(code),eFD=verifyDemoSignature(code);
+    if(!eM&&!eFP&&!eFD)return showLoginAlert('Codigo invalido para este dispositivo.','error');
+    guardarLicencia(code,negocio,eFD&&!eM&&!eFP);doStartApp(negocio,user);return;
+  }
+  var iM=MASTER.includes(code),hFP=verifyLicenseSignature(code),hFD=verifyDemoSignature(code);
+  if(!iM&&!hFP&&!hFD)return showLoginAlert('Codigo de activacion invalido.','error');
+  guardarLicencia(code,negocio,hFD&&!iM&&!hFP);doStartApp(negocio,user);
+}
+function guardarLicencia(code,negocio,esDemo){
+  var venceEn=null;
+  if(esDemo){var lics=getLicenses();var dl=lics.find(function(l){return l.code===code&&l.tipo==='DEMO';});if(dl){venceEn=dl.venceEn;}else{var v=new Date();v.setDate(v.getDate()+3);venceEn=v.toISOString();}}
+  DB.set('license',{code:code,deviceId:DEVICE_ID,activatedAt:new Date().toISOString(),esDemo:esDemo,venceEn:venceEn,tipo:esDemo?'DEMO':'PRO',negocio:negocio});
+}
+function doStartApp(negocio,user){
+  var lic=DB.get('license');
+  if(lic&&lic.esDemo){var vence=new Date(lic.venceEn);if(new Date()>vence){mostrarPantallaBloqueo(lic,vence);return;}var dias=Math.ceil((vence-new Date())/(1000*60*60*24));if(dias<=1)setTimeout(function(){showToast('Tu DEMO vence HOY. Activa tu licencia PRO.','warn');},1500);}
+  var cfg=DB.get('config')||{};
+  if(cfg.tasa>0)STATE.tasa=cfg.tasa;
+  if(cfg.pais&&PAISES[cfg.pais]){STATE.pais=cfg.pais;STATE.simboloLocal=PAISES[cfg.pais].simboloLocal;STATE.simboloRef=PAISES[cfg.pais].simboloRef||'$';window.PAY_METHODS=PAISES[cfg.pais].metodos.slice();}
+  STATE.user={negocio:negocio,user:user,deviceId:DEVICE_ID};DB.set('session',STATE.user);
+  document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='flex';
+  var av=document.getElementById('userAvatar');if(av)av.textContent=negocio[0].toUpperCase();
+  var un=document.getElementById('userName');if(un)un.textContent=negocio;
+  var un2=document.getElementById('userName2');if(un2)un2.textContent=user;
+  document.getElementById('licenseDeviceId').textContent='Device ID: '+DEVICE_ID;
+  var lt=document.getElementById('licTipo');if(lt)lt.textContent=(lic&&lic.esDemo)?'DEMO':'PRO';
+  var d=new Date();var pd=document.getElementById('pageDate');if(pd)pd.textContent=d.toLocaleDateString('es-VE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  if(window.innerWidth<=768){var mb=document.getElementById('mobileMenuBtn');if(mb)mb.style.display='flex';}
+  if(!DB.get('medicamentos'))loadSampleData();
+  renderPaymentBtns();showPage('dashboard');
+}
+function mostrarPantallaBloqueo(lic,vence){
+  var opts={weekday:'long',day:'numeric',month:'long',year:'numeric'};
+  var neg=lic&&lic.negocio?encodeURIComponent(lic.negocio):'mi farmacia';
+  var overlay=document.createElement('div');overlay.id='demoExpiredOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(5,13,26,.97);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML='<div style="max-width:420px;width:100%;text-align:center;font-family:var(--font)">'
+    +'<div style="font-size:70px;margin-bottom:14px">&#x23F0;</div>'
+    +'<div style="font-size:24px;font-weight:900;color:var(--warn);margin-bottom:8px;font-family:var(--display)">Demo Vencida</div>'
+    +'<div style="font-size:13px;color:var(--text2);margin-bottom:22px">Tu periodo de prueba vencio el<br><strong style="color:var(--text)">'+vence.toLocaleDateString('es-VE',opts)+'</strong></div>'
+    +'<div style="background:var(--card);border:2px solid var(--accent);border-radius:15px;padding:22px;margin-bottom:18px">'
+    +'<div style="font-size:14px;color:var(--neon);font-weight:700;margin-bottom:7px">Tus datos estan seguros</div>'
+    +'<div style="font-size:12px;color:var(--text2);margin-bottom:18px">Todo tu inventario, ventas y clientes siguen guardados. Activa tu licencia PRO para continuar.</div>'
+    +'<input type="text" id="codigoProInput" placeholder="Ingresa tu Codigo PRO..." style="width:100%;text-align:center;font-size:14px;font-weight:700;letter-spacing:2px;padding:11px;border:2px solid var(--accent);border-radius:9px;background:var(--bg2);color:var(--text);box-sizing:border-box;margin-bottom:11px;font-family:monospace">'
+    +'<button onclick="activarConCodigoPro()" style="width:100%;background:linear-gradient(135deg,#00c8ff,#00e5a0);color:#050d1a;font-weight:900;font-size:15px;border:none;border-radius:11px;padding:13px;cursor:pointer;font-family:var(--font)">Activar Licencia PRO</button>'
+    +'</div>'
+    +'<a href="https://wa.me/584164117331?text=Hola%20A2K%2C%20quiero%20activar%20Farmacia%20PRO%20para%20'+neg+'" target="_blank" style="display:block;background:#25D366;color:#fff;text-decoration:none;padding:13px;border-radius:11px;font-weight:700;font-size:14px">Contactar A2K - +58 416 411 7331</a>'
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+function activarConCodigoPro(){
+  var el=document.getElementById('codigoProInput');
+  var codigo=el?el.value.trim().toUpperCase():'';
+  if(!codigo){showToast('Ingresa el codigo PRO','warn');return;}
+  var MASTER=['FARM-ABIG-2024','FARM-ZYNC-2024'];
+  if(!MASTER.includes(codigo)&&!verifyLicenseSignature(codigo)){
+    if(el){el.style.border='2px solid var(--danger)';el.value='';el.placeholder='Codigo invalido...';}
+    showToast('Codigo PRO invalido.','error');return;
+  }
+  var old=DB.get('license')||{};
+  DB.set('license',{code:codigo,deviceId:old.deviceId||'unknown',activatedAt:new Date().toISOString(),esDemo:false,tipo:'PRO',negocio:old.negocio||''});
+  var overlay=document.getElementById('demoExpiredOverlay');
+  if(overlay){overlay.innerHTML='<div style="text-align:center;color:var(--text);padding:40px"><div style="font-size:60px;margin-bottom:14px">&#x1F389;</div><div style="font-size:22px;font-weight:900;color:var(--neon);margin-bottom:8px;font-family:var(--display)">Licencia PRO Activada!</div><div style="color:var(--text2)">Cargando tu farmacia...</div></div>';}
+  setTimeout(function(){location.reload();},2000);
+}
+function doLogout(){openModal('modalLogout');}
+function confirmarLogout(){DB.del('session');closeModal('modalLogout');location.reload();}
+
+// NAVEGACION
+function showPage(page){
+  STATE.currentPage=page;
+  ['dashboard','pos','inventario','alertas','recetas','clientes','historial','proveedores','reportes','configuracion'].forEach(function(p){
+    var el=document.getElementById('page-'+p);if(el)el.style.display=(p===page)?'':'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(el){
+    if(el.getAttribute('onclick')&&el.getAttribute('onclick').includes("'"+page+"'"))el.classList.add('active');
+  });
+  var titles={dashboard:'Dashboard',pos:'Punto de Venta',inventario:'Inventario',alertas:'Alertas',recetas:'Recetas Medicas',clientes:'Clientes',historial:'Historial',proveedores:'Proveedores',reportes:'Reportes',configuracion:'Configuracion'};
+  var pt=document.getElementById('pageTitle');if(pt)pt.textContent=titles[page]||page;
+  if(page==='dashboard')renderDashboard();
+  else if(page==='pos')renderPOS();
+  else if(page==='inventario')renderInventario();
+  else if(page==='alertas')renderAlertas();
+  else if(page==='recetas')renderRecetas();
+  else if(page==='clientes')renderClientes();
+  else if(page==='historial')renderHistorial();
+  else if(page==='proveedores')renderProveedores();
+  else if(page==='reportes')renderReportes();
+  else if(page==='configuracion')renderConfiguracion();
+  if(window.innerWidth<=768)closeMobileSidebar();
+}
+
+// DASHBOARD
+function renderDashboard(){
+  var ventas=DB.get('ventas')||[];var meds=DB.get('medicamentos')||[];
+  var hoy=new Date().toDateString();
+  var vh=ventas.filter(function(v){return new Date(v.fecha).toDateString()===hoy;});
+  var th=vh.reduce(function(a,v){return a+v.totalUSD;},0);
+  var gh=vh.reduce(function(a,v){return a+(v.totalUSD-(v.costoTotal||0));},0);
+  var vencidos=meds.filter(function(m){return diasHastaVencer(m.vencimiento)<=0;});
+  var proxV=meds.filter(function(m){var d=diasHastaVencer(m.vencimiento);return d>0&&d<=30;});
+  var sinSt=meds.filter(function(m){return m.stock<=0;});
+  var stBj=meds.filter(function(m){return m.stock>0&&m.stock<=(m.stockMin||5);});
+  var totalA=vencidos.length+proxV.length+sinSt.length+stBj.length;
+  var ab=document.getElementById('alertaBadge');if(ab){ab.textContent=totalA;ab.style.display=totalA>0?'block':'none';}
+  var ta=document.getElementById('topbarAlert');if(ta)ta.style.display=totalA>0?'flex':'none';
+  var tat=document.getElementById('topbarAlertText');if(tat)tat.textContent=totalA+' alerta'+(totalA!==1?'s':'');
+  var tm=ventas.filter(function(v){var d=new Date(v.fecha);var n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();}).reduce(function(a,v){return a+v.totalUSD;},0);
+  var ds=document.getElementById('dashStats');
+  if(ds)ds.innerHTML=[
+    {icon:'&#x1F4B0;',label:'Ventas Hoy',val:'$'+fmt(th),sub:fmtLocal(th*STATE.tasa)+' - '+vh.length+' trans.',cls:'blue',g:'&#x1F4B0;'},
+    {icon:'&#x1F4C5;',label:'Ventas Mes',val:'$'+fmt(tm),sub:'Acumulado mensual',cls:'green',g:'&#x1F4C8;'},
+    {icon:'&#x1F4CA;',label:'Ganancia Hoy',val:'$'+fmt(gh),sub:(th>0?((gh/th)*100).toFixed(1):0)+'% margen',cls:'blue',g:'&#x1F48E;'},
+    {icon:'&#x26A0;&#xFE0F;',label:'Alertas',val:totalA,sub:vencidos.length+' vencidos - '+sinSt.length+' sin stock',cls:totalA>0?'red':'green',g:'&#x1F6A8;'},
+  ].map(function(s){return '<div class="stat-card '+s.cls+'"><div class="stat-icon">'+s.icon+'</div><div class="stat-label">'+s.label+'</div><div class="stat-val '+(s.cls==='red'?'red':s.cls==='green'?'green':'blue')+'">'+s.val+'</div><div class="stat-sub">'+s.sub+'</div><div class="stat-glow">'+s.g+'</div></div>';}).join('');
+  var canvas=document.getElementById('chartVentas');
+  if(canvas){if(STATE.charts.ventas)STATE.charts.ventas.destroy();
+    var labels=[],data=[];
+    for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);labels.push(d.toLocaleDateString('es-VE',{weekday:'short'}));var tot=ventas.filter(function(v){return new Date(v.fecha).toDateString()===d.toDateString();}).reduce(function(a,v){return a+v.totalUSD;},0);data.push(tot);}
+    STATE.charts.ventas=new Chart(canvas,{type:'line',data:{labels:labels,datasets:[{label:'$',data:data,borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,.08)',fill:true,tension:.4,pointBackgroundColor:'#00c8ff',pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,200,255,.06)'},ticks:{color:'#7a9fc0'}},y:{grid:{color:'rgba(0,200,255,.06)'},ticks:{color:'#7a9fc0',callback:function(v){return '$'+v;}}}}}})}
+  var da=document.getElementById('dashAlertas');
+  if(da){var aler=[];
+    vencidos.slice(0,3).forEach(function(m){aler.push({t:'red',i:'&#x1F48A;',tit:m.nombre,desc:'VENCIDO - '+m.presentacion,f:'Vencio: '+fmtDate(m.vencimiento)});});
+    proxV.slice(0,2).forEach(function(m){aler.push({t:'warn',i:'&#x23F0;',tit:m.nombre,desc:diasHastaVencer(m.vencimiento)+' dias para vencer',f:'Vence: '+fmtDate(m.vencimiento)});});
+    sinSt.slice(0,2).forEach(function(m){aler.push({t:'red',i:'&#x1F4E6;',tit:m.nombre,desc:'SIN STOCK',f:'Agotado'});});
+    if(!aler.length)da.innerHTML='<div style="text-align:center;padding:25px;color:var(--text2)"><div style="font-size:32px;margin-bottom:7px">&#x2705;</div><div>Sin alertas criticas</div></div>';
+    else da.innerHTML=aler.slice(0,4).map(function(a){return '<div class="alerta-card '+a.t+'"><div class="alerta-icon">'+a.i+'</div><div class="alerta-info"><div class="alerta-title">'+a.tit+'</div><div class="alerta-desc">'+a.desc+'</div><div class="alerta-fecha" style="color:var(--'+(a.t==='red'?'danger':'warn')+')">'+a.f+'</div></div></div>';}).join('');}
+  var dm=document.getElementById('dashTopMeds');
+  if(dm){var cont={};ventas.forEach(function(v){(v.items||[]).forEach(function(it){cont[it.nombre]=(cont[it.nombre]||0)+it.qty;});});var top=Object.entries(cont).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+    if(!top.length)dm.innerHTML='<div class="section-empty" style="padding:18px"><div class="e-icon" style="font-size:28px">&#x1F48A;</div><p>Sin ventas aun</p></div>';
+    else dm.innerHTML=top.map(function(t,i){return '<div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:16px;font-weight:700;color:var(--text3);width:18px">'+(i+1)+'</span><span style="flex:1;font-weight:600;color:var(--text)">'+t[0]+'</span><span class="badge badge-blue">'+t[1]+' uds</span></div>';}).join('');}
+  var dv=document.getElementById('dashUltVentas');
+  if(dv){var ult=ventas.slice(-5).reverse();
+    if(!ult.length)dv.innerHTML='<div class="section-empty" style="padding:18px"><div class="e-icon" style="font-size:28px">&#x1F6D2;</div><p>Sin ventas</p></div>';
+    else dv.innerHTML=ult.map(function(v){return '<div style="display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">'+(v.items&&v.items.length?v.items[0].nombre:'Venta')+'</div><div style="font-size:10px;color:var(--text2)">'+fmtDate(v.fecha)+' '+fmtTime(v.fecha)+'</div></div><span style="color:var(--neon);font-weight:700;font-size:12px">$'+fmt(v.totalUSD)+'</span></div>';}).join('');}
+}
+
+// POS
+var posCategoria='Todos';
+function renderPOS(){
+  var meds=DB.get('medicamentos')||[];
+  var cats=['Todos'];meds.forEach(function(m){if(!cats.includes(m.categoria))cats.push(m.categoria);});
+  var cf=document.getElementById('posCats');
+  if(cf)cf.innerHTML=cats.map(function(c){return '<button class="cat-btn'+(c===posCategoria?' active':'')+'" onclick="posCategoria=\''+c+'\';renderPOS()">'+c+'</button>';}).join('');
+  var q=(document.getElementById('posSearch')||{}).value||'';
+  var f=meds.filter(function(m){return(!q||m.nombre.toLowerCase().includes(q.toLowerCase()))&&(posCategoria==='Todos'||m.categoria===posCategoria);});
+  var pg=document.getElementById('posGrid');if(!pg)return;
+  if(!f.length){pg.innerHTML='<div class="section-empty"><div class="e-icon">&#x1F48A;</div><p>Sin medicamentos</p></div>';return;}
+  pg.innerHTML=f.map(function(m){var d=diasHastaVencer(m.vencimiento);var vcls=d<=0?'vence-crit':d<=30?'vence-warn':'vence-ok';var vt=d<=0?'VENCIDO':d<=30?d+'d':'OK';return '<div class="med-card'+(m.stock<=0?' sin-stock':'')+'" onclick="addToCart('+m.id+')">'+'<div class="med-icon">'+(m.emoji||'&#x1F48A;')+'</div><div class="med-name">'+m.nombre+'</div><div class="med-price">$'+fmt(m.precio)+'</div><div class="med-stock">'+(m.stock<=0?'<span style="color:var(--danger)">Sin stock</span>':m.stock+' uds')+'</div><div class="med-vence '+vcls+'">'+vt+'</div></div>';}).join('');
+}
+function addToCart(id){
+  var meds=DB.get('medicamentos')||[];var m=meds.find(function(x){return x.id===id;});
+  if(!m||m.stock<=0){showToast('Sin stock disponible','warn');return;}
+  var ex=STATE.cart.find(function(c){return c.id===id;});
+  if(ex){if(ex.qty>=m.stock){showToast('Stock maximo','warn');return;}ex.qty++;}
+  else STATE.cart.push({id:id,nombre:m.nombre,precio:m.precio,costo:m.costo||0,qty:1,emoji:m.emoji||'&#x1F48A;'});
+  renderCart();
+}
+function removeFromCart(id){STATE.cart=STATE.cart.filter(function(c){return c.id!==id;});renderCart();}
+function changeQty(id,delta){var item=STATE.cart.find(function(c){return c.id===id;});if(!item)return;item.qty+=delta;if(item.qty<=0)removeFromCart(id);else renderCart();}
+function clearCart(){STATE.cart=[];STATE.payMethod='';renderCart();}
+function renderCart(){
+  var ci=document.getElementById('cartItems'),cc=document.getElementById('cartCount'),ct=document.getElementById('cartTotal'),ctbs=document.getElementById('cartTotalBs');if(!ci)return;
+  var total=STATE.cart.reduce(function(a,c){return a+c.precio*c.qty;},0);
+  if(!STATE.cart.length)ci.innerHTML='<div class="section-empty" style="padding:25px 18px"><div class="e-icon">&#x1F48A;</div><p>Agrega medicamentos</p></div>';
+  else ci.innerHTML=STATE.cart.map(function(c){return '<div class="cart-item"><span style="font-size:18px">'+c.emoji+'</span><div style="flex:1"><div class="cart-item-name">'+c.nombre+'</div><div style="font-size:11px;color:var(--text2)">$'+fmt(c.precio)+' c/u</div></div><button class="qty-btn" onclick="changeQty('+c.id+',-1)">-</button><span style="font-size:13px;font-weight:700;color:var(--text);min-width:18px;text-align:center">'+c.qty+'</span><button class="qty-btn" onclick="changeQty('+c.id+',1)">+</button><span class="cart-item-price">$'+fmt(c.precio*c.qty)+'</span><button onclick="removeFromCart('+c.id+')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:13px;padding:2px">x</button></div>';}).join('');
+  if(cc)cc.textContent=STATE.cart.reduce(function(a,c){return a+c.qty;},0)+' productos';
+  if(ct)ct.textContent='$'+fmt(total);
+  if(ctbs)ctbs.textContent=fmtLocal(total*STATE.tasa)+' - Tasa '+STATE.tasa;
+}
+function selPago(metodo){
+  STATE.payMethod=metodo;renderPaymentBtns();
+  var msg=document.getElementById('noPayMethodMsg');var btn=document.getElementById('btnCobrar');
+  if(msg)msg.style.display='none';
+  if(btn){btn.textContent='COBRAR - '+metodo;btn.style.background='linear-gradient(135deg,#00e5a0,#00c8ff)';}
+}
+function renderPaymentBtns(){
+  var container=document.getElementById('paymentBtns');if(!container)return;
+  var pais=PAISES[STATE.pais||'VE']||PAISES['VE'];
+  var metodos=window.PAY_METHODS&&window.PAY_METHODS.length>0?window.PAY_METHODS:pais.metodos;
+  var html='';
+  for(var mi=0;mi<metodos.length;mi++){var m=metodos[mi];var sel=STATE.payMethod===m.label?' selected':'';html+='<button class="pay-btn'+sel+'" data-lbl="'+m.label+'" onclick="selPago(this.getAttribute(\'data-lbl\'))">'+m.label+'</button>';}
+  container.innerHTML=html;
+}
+// PAGO MIXTO
+var pagosMixtos=[];
+function procesarVenta(){
+  if(!STATE.cart.length){showToast('Agrega productos','warn');return;}
+  if(!STATE.payMethod){showToast('Selecciona metodo de pago','warn');return;}
+  var total=STATE.cart.reduce(function(a,c){return a+c.precio*c.qty;},0);
+  // Abrir modal de cobro
+  pagosMixtos=[];
+  var resEl=document.getElementById('cobroResumen');
+  if(resEl){
+    var items=STATE.cart.map(function(c){return '<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border)"><span>'+c.nombre+' x'+c.qty+'</span><span style="color:var(--neon);font-weight:700">$'+fmt(c.precio*c.qty)+'</span></div>';}).join('');
+    resEl.innerHTML=items+'<div style="display:flex;justify-content:space-between;margin-top:8px;font-weight:900;font-size:16px"><span>TOTAL</span><span style="color:var(--neon)">$'+fmt(total)+'</span></div><div style="font-size:11px;color:var(--text2);margin-top:3px">'+fmtLocal(total*STATE.tasa)+' · Tasa '+STATE.tasa+'</div>';
+  }
+  // Metodos en modal cobro
+  var pais=PAISES[STATE.pais||'VE']||PAISES['VE'];
+  var metodos=window.PAY_METHODS&&window.PAY_METHODS.length>0?window.PAY_METHODS:pais.metodos;
+  var cobroMet=document.getElementById('cobroMetodos');
+  if(cobroMet){
+    cobroMet.innerHTML=metodos.map(function(m){return '<button class="pay-btn'+(STATE.payMethod===m.label?' selected':'')+'" onclick="selCobroMetodo(\''+m.label+'\',\''+m.id+'\')">'+m.label+'</button>';}).join('');
+  }
+  var mixPanel=document.getElementById('pagoMixtoPanel');
+  var montoGrp=document.getElementById('montoRecibidoGroup');
+  if(STATE.payMethod==='Pago Mixto'||STATE.payMethod==='Mixto'){
+    if(mixPanel)mixPanel.style.display='';if(montoGrp)montoGrp.style.display='none';
+  } else {
+    if(mixPanel)mixPanel.style.display='none';if(montoGrp)montoGrp.style.display='';
+  }
+  var mr=document.getElementById('montoRecibido');if(mr)mr.value='';
+  var vd=document.getElementById('vueltoDisplay');if(vd)vd.style.display='none';
+  var cc=document.getElementById('cobroCliente');if(cc)cc.value=(document.getElementById('clientePOS')||{}).value||'';
+  openModal('modalCobro');
+}
+function selCobroMetodo(label,id){
+  STATE.payMethod=label;
+  var btns=document.querySelectorAll('#cobroMetodos .pay-btn');
+  btns.forEach(function(b){b.classList.remove('selected');if(b.textContent.trim()===label)b.classList.add('selected');});
+  var mixPanel=document.getElementById('pagoMixtoPanel');
+  var montoGrp=document.getElementById('montoRecibidoGroup');
+  if(id==='mix'||label.toLowerCase().includes('mixto')){
+    if(mixPanel)mixPanel.style.display='';if(montoGrp)montoGrp.style.display='none';
+    renderPagosMixtos();
+  } else {
+    if(mixPanel)mixPanel.style.display='none';if(montoGrp)montoGrp.style.display='';
+  }
+}
+function agregarPagoMixto(){
+  var pais=PAISES[STATE.pais||'VE']||PAISES['VE'];
+  var metodos=window.PAY_METHODS&&window.PAY_METHODS.length>0?window.PAY_METHODS:pais.metodos;
+  pagosMixtos.push({metodo:metodos[0]?metodos[0].label:'Efectivo $',monto:0});
+  renderPagosMixtos();
+}
+function renderPagosMixtos(){
+  var pais=PAISES[STATE.pais||'VE']||PAISES['VE'];
+  var metodos=window.PAY_METHODS&&window.PAY_METHODS.length>0?window.PAY_METHODS:pais.metodos;
+  var total=STATE.cart.reduce(function(a,c){return a+c.precio*c.qty;},0);
+  var lista=document.getElementById('pagosMixtosList');
+  if(!lista)return;
+  lista.innerHTML=pagosMixtos.map(function(p,i){
+    var opts=metodos.map(function(m){return '<option value="'+m.label+'"'+(p.metodo===m.label?' selected':'')+'>'+m.label+'</option>';}).join('');
+    return '<div style="display:flex;gap:6px;margin-bottom:7px;align-items:center"><select class="form-select" style="flex:1;font-size:12px;padding:7px" onchange="pagosMixtos['+i+'].metodo=this.value">'+opts+'</select><input type="number" class="form-input" style="width:100px;font-size:12px;padding:7px" placeholder="$0.00" value="'+(p.monto||'')+'" oninput="pagosMixtos['+i+'].monto=parseFloat(this.value)||0;actualizarRemanente()"><button onclick="pagosMixtos.splice('+i+',1);renderPagosMixtos()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px">×</button></div>';
+  }).join('');
+  actualizarRemanente();
+}
+function actualizarRemanente(){
+  var total=STATE.cart.reduce(function(a,c){return a+c.precio*c.qty;},0);
+  var pagado=pagosMixtos.reduce(function(a,p){return a+(p.monto||0);},0);
+  var rem=total-pagado;
+  var el=document.getElementById('remanenteMixto');
+  if(el){
+    if(rem>0.001)el.innerHTML='<span style="color:var(--warn)">Falta: $'+fmt(rem)+'</span>';
+    else if(rem<-0.001)el.innerHTML='<span style="color:var(--neon)">Vuelto: $'+fmt(Math.abs(rem))+'</span>';
+    else el.innerHTML='<span style="color:var(--neon)">✅ Cubierto exacto</span>';
+  }
+}
+function calcularVuelto(){
+  var total=STATE.cart.reduce(function(a,c){return a+c.precio*c.qty;},0);
+  var recibido=parseFloat(document.getElementById('montoRecibido').value)||0;
+  var vd=document.getElementById('vueltoDisplay');
+  if(recibido>0&&recibido>=total){
+    var vuelto=recibido-total;
+    var vueltoBS=vuelto*STATE.tasa;
+    document.getElementById('vueltoDolares').textContent='$'+fmt(vuelto);
+    document.getElementById('vueltoBolivares').textContent=fmtLocal(vueltoBS)+' · Tasa '+STATE.tasa;
+    if(vd)vd.style.display='';
+  } else {
+    if(vd)vd.style.display='none';
+  }
+}
+function confirmarCobroFinal(){
+  var total=STATE.cart.reduce(function(a,c){return a+c.precio*c.qty;},0);
+  var costo=STATE.cart.reduce(function(a,c){return a+c.costo*c.qty;},0);
+  var esMixto=STATE.payMethod&&STATE.payMethod.toLowerCase().includes('mixto');
+  if(esMixto){
+    var pagado=pagosMixtos.reduce(function(a,p){return a+(p.monto||0);},0);
+    if(pagado<total-0.001){showToast('El monto no cubre el total','warn');return;}
+  }
+  var recibido=parseFloat((document.getElementById('montoRecibido')||{}).value)||0;
+  var vuelto=recibido>0?Math.max(0,recibido-total):0;
+  var cliente=(document.getElementById('cobroCliente')||{}).value||null;
+  var venta={
+    id:Date.now(),
+    fecha:new Date().toISOString(),
+    items:STATE.cart.map(function(c){return{id:c.id,nombre:c.nombre,precio:c.precio,costo:c.costo||0,qty:c.qty,subtotal:c.precio*c.qty};}),
+    totalUSD:total,
+    totalLocal:total*STATE.tasa,
+    costoTotal:costo,
+    metodo:esMixto?'Mixto':STATE.payMethod,
+    pagos:esMixto?pagosMixtos.slice():null,
+    cliente:cliente,
+    tasa:STATE.tasa,
+    montoRecibido:recibido||null,
+    vuelto:vuelto||null
+  };
+  var meds=DB.get('medicamentos')||[];
+  STATE.cart.forEach(function(c){var m=meds.find(function(x){return x.id===c.id;});if(m)m.stock=Math.max(0,m.stock-c.qty);});
+  DB.set('medicamentos',meds);
+  var ventas=DB.get('ventas')||[];ventas.push(venta);DB.set('ventas',ventas);
+  // Guardar offline si es necesario
+  if(!navigator.onLine){
+    var pendientes=JSON.parse(localStorage.getItem('fp_pendientes')||'[]');
+    pendientes.push(venta);
+    localStorage.setItem('fp_pendientes',JSON.stringify(pendientes));
+  }
+  STATE._ventaActual=venta;
+  closeModal('modalCobro');
+  clearCart();
+  var cp=document.getElementById('clientePOS');if(cp)cp.value='';
+  STATE.payMethod='';renderPaymentBtns();
+  var btn=document.getElementById('btnCobrar');if(btn)btn.textContent='COBRAR';
+  var msg=document.getElementById('noPayMethodMsg');if(msg)msg.style.display='block';
+  showToast('Venta registrada - $'+fmt(total),'success');
+  mostrarTicket(venta);
+}
+
+// TICKET
+function mostrarTicket(venta){
+  var cfg=DB.get('config')||{};
+  var negocio=cfg.negocio||STATE.user&&STATE.user.negocio||'Farmacia Pro';
+  var fecha=new Date(venta.fecha);
+  var fechaStr=fecha.toLocaleDateString('es-VE')+' '+fecha.toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});
+  var sep='--------------------------------';
+  var items=venta.items.map(function(it){
+    var lin=it.nombre.substring(0,18);var price='$'+fmt(it.precio*it.qty);
+    var sp=sep.substring(0,32-lin.length-price.length-4);
+    return lin+' x'+it.qty+sp+price;
+  }).join('\n');
+  var metodoStr=venta.metodo;
+  if(venta.pagos&&venta.pagos.length){
+    metodoStr='Mixto:\n'+venta.pagos.map(function(p){return '  '+p.metodo+': $'+fmt(p.monto);}).join('\n');
+  }
+  var vueltoStr='';
+  if(venta.vuelto>0){
+    vueltoStr='\nVuelto:       $'+fmt(venta.vuelto)+'\nVuelto Bs:    '+fmtLocal(venta.vuelto*venta.tasa);
+  }
+  var ticket=[
+    negocio,
+    cfg.direccion||'',
+    cfg.telefono||'',
+    sep,
+    'Recibo #'+venta.id.toString().slice(-6),
+    fechaStr,
+    sep,
+    items,
+    sep,
+    'TOTAL USD:    $'+fmt(venta.totalUSD),
+    'TOTAL Bs:     '+fmtLocal(venta.totalLocal),
+    sep,
+    'Metodo: '+metodoStr,
+    (venta.montoRecibido?'Recibido: $'+fmt(venta.montoRecibido):''),
+    vueltoStr,
+    'Tasa: '+venta.tasa+' Bs/$',
+    sep,
+    venta.cliente?'Paciente: '+venta.cliente:'',
+    sep,
+    'Gracias por su compra!',
+    'A2K Digital Studio'
+  ].filter(Boolean).join('\n');
+  var el=document.getElementById('ticketContent');
+  if(el)el.innerHTML=ticket.replace(/\n/g,'<br>').replace(/ /g,'&nbsp;');
+  openModal('modalTicket');
+}
+function imprimirTicket58mm(){
+  if(!STATE._ventaActual){showToast('Sin venta activa','warn');return;}
+  var cfg=DB.get('config')||{};
+  var venta=STATE._ventaActual;
+  var negocio=cfg.negocio||'Farmacia Pro';
+  var fecha=new Date(venta.fecha).toLocaleDateString('es-VE')+' '+new Date(venta.fecha).toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});
+  var items=venta.items.map(function(it){return '<tr><td>'+it.nombre+'</td><td style="text-align:center">'+it.qty+'</td><td style="text-align:right">$'+fmt(it.precio)+'</td><td style="text-align:right">$'+fmt(it.subtotal)+'</td></tr>';}).join('');
+  var vueltoStr=venta.vuelto>0?'<tr><td colspan="3"><b>Vuelto</b></td><td><b>$'+fmt(venta.vuelto)+'</b></td></tr><tr><td colspan="3">Vuelto Bs</td><td>'+fmtLocal(venta.vuelto*venta.tasa)+'</td></tr>':'';
+  var w=window.open('','_blank','width=300');
+  w.document.write('<!DOCTYPE html><html><head><title>Ticket</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:monospace;font-size:11px;width:58mm;padding:3mm}h2{font-size:12px;text-align:center;margin-bottom:3px}.sep{border-top:1px dashed #000;margin:4px 0}table{width:100%;border-collapse:collapse}td{padding:1px 2px;font-size:10px}@media print{body{margin:0}}</style></head><body>');
+  w.document.write('<h2>'+negocio+'</h2>');
+  if(cfg.direccion)w.document.write('<div style="text-align:center;font-size:9px">'+cfg.direccion+'</div>');
+  if(cfg.telefono)w.document.write('<div style="text-align:center;font-size:9px">'+cfg.telefono+'</div>');
+  w.document.write('<div class="sep"></div>');
+  w.document.write('<div style="text-align:center">Recibo #'+venta.id.toString().slice(-6)+'</div>');
+  w.document.write('<div style="text-align:center;font-size:9px">'+fecha+'</div>');
+  w.document.write('<div class="sep"></div>');
+  w.document.write('<table><thead><tr><th style="text-align:left">Prod</th><th>Cant</th><th>P.U</th><th>Total</th></tr></thead><tbody>'+items+'</tbody></table>');
+  w.document.write('<div class="sep"></div>');
+  w.document.write('<table><tr><td colspan="3"><b>TOTAL USD</b></td><td><b>$'+fmt(venta.totalUSD)+'</b></td></tr>');
+  w.document.write('<tr><td colspan="3">TOTAL Bs</td><td>'+fmtLocal(venta.totalLocal)+'</td></tr>');
+  w.document.write('<tr><td colspan="3">Metodo</td><td>'+venta.metodo+'</td></tr>');
+  if(venta.montoRecibido)w.document.write('<tr><td colspan="3">Recibido</td><td>$'+fmt(venta.montoRecibido)+'</td></tr>');
+  w.document.write(vueltoStr);
+  w.document.write('<tr><td colspan="3">Tasa</td><td>'+venta.tasa+'</td></tr></table>');
+  w.document.write('<div class="sep"></div>');
+  if(venta.cliente)w.document.write('<div>Paciente: '+venta.cliente+'</div>');
+  w.document.write('<div style="text-align:center;margin-top:5px">Gracias por su compra!</div>');
+  w.document.write('<div style="text-align:center;font-size:9px">A2K Digital Studio</div>');
+  w.document.write('</body></html>');
+  w.document.close();w.focus();w.print();
+}
+function enviarTicketWhatsApp(){
+  if(!STATE._ventaActual){showToast('Sin venta activa','warn');return;}
+  var venta=STATE._ventaActual;
+  var cfg=DB.get('config')||{};
+  var negocio=cfg.negocio||'Farmacia Pro';
+  var fecha=new Date(venta.fecha).toLocaleDateString('es-VE');
+  var items=venta.items.map(function(it){return it.nombre+' x'+it.qty+' = $'+fmt(it.precio*it.qty);}).join('\n');
+  var vueltoStr=venta.vuelto>0?'\nVuelto: $'+fmt(venta.vuelto)+' / '+fmtLocal(venta.vuelto*venta.tasa):'';
+  var msg=[
+    '🏥 '+negocio,
+    '📋 Recibo #'+venta.id.toString().slice(-6),
+    '📅 '+fecha,
+    '─────────────────',
+    items,
+    '─────────────────',
+    '💵 Total: $'+fmt(venta.totalUSD),
+    '🇻🇪 Bs: '+fmtLocal(venta.totalLocal),
+    '💳 Metodo: '+venta.metodo,
+    vueltoStr,
+    '📊 Tasa: '+venta.tasa+' Bs/$',
+    '─────────────────',
+    '✅ Gracias por su compra!',
+    'A2K Digital Studio'
+  ].filter(Boolean).join('\n');
+  var tel=venta.cliente&&cfg.telefono?cfg.telefono:'';
+  window.open('https://wa.me/'+tel.replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+// CIERRE DIARIO
+function mostrarCierreDiario(){
+  var ventas=DB.get('ventas')||[];
+  var hoy=new Date().toDateString();
+  var vh=ventas.filter(function(v){return new Date(v.fecha).toDateString()===hoy;});
+  var total=vh.reduce(function(a,v){return a+v.totalUSD;},0);
+  var ganancia=vh.reduce(function(a,v){return a+(v.totalUSD-(v.costoTotal||0));},0);
+  var porMetodo={};
+  vh.forEach(function(v){porMetodo[v.metodo]=(porMetodo[v.metodo]||0)+v.totalUSD;});
+  var metodoRows=Object.entries(porMetodo).map(function(e){return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">'+e[0]+'</span><span style="color:var(--text);font-weight:600">$'+fmt(e[1])+'</span></div>';}).join('');
+  var el=document.getElementById('cierreContent');
+  if(el)el.innerHTML=[
+    '<div class="stats-grid" style="grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">',
+    '<div class="stat-card blue"><div class="stat-label">Total Ventas</div><div class="stat-val blue">$'+fmt(total)+'</div><div class="stat-sub">'+fmtLocal(total*STATE.tasa)+'</div></div>',
+    '<div class="stat-card green"><div class="stat-label">Transacciones</div><div class="stat-val green">'+vh.length+'</div><div class="stat-sub">ventas hoy</div></div>',
+    '<div class="stat-card green"><div class="stat-label">Ganancia</div><div class="stat-val green">$'+fmt(ganancia)+'</div><div class="stat-sub">'+(total>0?((ganancia/total)*100).toFixed(1):0)+'% margen</div></div>',
+    '<div class="stat-card blue"><div class="stat-label">Ticket Prom.</div><div class="stat-val blue">$'+fmt(vh.length?total/vh.length:0)+'</div><div class="stat-sub">por venta</div></div>',
+    '</div>',
+    '<div class="card"><div class="card-title mb-3">Desglose por Metodo</div>',
+    metodoRows||'<div style="color:var(--text2);text-align:center;padding:14px">Sin ventas hoy</div>',
+    '</div>'
+  ].join('');
+  STATE._cierreDiario={total:total,ganancia:ganancia,transacciones:vh.length,porMetodo:porMetodo,tasa:STATE.tasa};
+  openModal('modalCierre');
+}
+function enviarCierreWhatsApp(){
+  if(!STATE._cierreDiario){showToast('Genera el cierre primero','warn');return;}
+  var c=STATE._cierreDiario;
+  var cfg=DB.get('config')||{};
+  var fecha=new Date().toLocaleDateString('es-VE');
+  var metodos=Object.entries(c.porMetodo).map(function(e){return '  '+e[0]+': $'+fmt(e[1]);}).join('\n');
+  var msg=[
+    '🏥 '+( cfg.negocio||'Farmacia Pro'),
+    '📊 CIERRE DEL DIA - '+fecha,
+    '═══════════════════',
+    '💵 Total Ventas: $'+fmt(c.total),
+    '🇻🇪 Total Bs: '+fmtLocal(c.total*c.tasa),
+    '📈 Ganancia: $'+fmt(c.ganancia),
+    '🧾 Transacciones: '+c.transacciones,
+    '═══════════════════',
+    '💳 Por Metodo:',
+    metodos,
+    '═══════════════════',
+    'A2K Digital Studio'
+  ].join('\n');
+  var tel=(cfg.telefono||'').replace(/\D/g,'');
+  window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+// MODO OFFLINE
+function initOfflineMode(){
+  function updateIndicator(){
+    var online=navigator.onLine;
+    var dot=document.getElementById('onlineDot');
+    var text=document.getElementById('onlineText');
+    var ind=document.getElementById('onlineIndicator');
+    if(dot)dot.style.background=online?'#00e5a0':'#ff4d6d';
+    if(text)text.textContent=online?'Online':'Offline';
+    if(ind){ind.style.background=online?'rgba(0,229,160,.12)':'rgba(255,77,109,.12)';ind.style.borderColor=online?'rgba(0,229,160,.3)':'rgba(255,77,109,.3)';ind.style.color=online?'#00e5a0':'#ff4d6d';}
+    if(online)sincronizarPendientes();
+  }
+  window.addEventListener('online',function(){updateIndicator();showToast('Conexion restaurada - Sincronizando...','success');});
+  window.addEventListener('offline',function(){updateIndicator();showToast('Sin conexion - Modo offline activo','warn');});
+  updateIndicator();
+}
+function sincronizarPendientes(){
+  var pendientes=JSON.parse(localStorage.getItem('fp_pendientes')||'[]');
+  if(!pendientes.length)return;
+  var ventas=DB.get('ventas')||[];
+  pendientes.forEach(function(v){if(!ventas.find(function(x){return x.id===v.id;}))ventas.push(v);});
+  DB.set('ventas',ventas);
+  localStorage.removeItem('fp_pendientes');
+  showToast(pendientes.length+' ventas offline sincronizadas','success');
+}
+
+// INVENTARIO
+function renderInventario(){
+  var meds=DB.get('medicamentos')||[];
+  var th=document.getElementById('th-local');if(th)th.textContent='P. Venta '+(STATE.simboloLocal||'Bs');
+  var invCat=document.getElementById('invCat');
+  if(invCat&&invCat.options.length<=1){var cats=[];meds.forEach(function(m){if(!cats.includes(m.categoria))cats.push(m.categoria);});cats.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;invCat.appendChild(o);});}
+  var q=(document.getElementById('invSearch')||{}).value||'';
+  var cat=(document.getElementById('invCat')||{}).value||'';
+  var stock=(document.getElementById('invStock')||{}).value||'';
+  var f=meds.filter(function(m){var mq=!q||m.nombre.toLowerCase().includes(q.toLowerCase());var mc=!cat||m.categoria===cat;var ms=true;if(stock==='ok')ms=m.stock>(m.stockMin||5);else if(stock==='bajo')ms=m.stock>0&&m.stock<=(m.stockMin||5);else if(stock==='agotado')ms=m.stock<=0;else if(stock==='vence')ms=diasHastaVencer(m.vencimiento)<=30&&diasHastaVencer(m.vencimiento)>0;return mq&&mc&&ms;});
+  var tbody=document.getElementById('invTable');if(!tbody)return;
+  if(!f.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:35px;color:var(--text2)">Sin medicamentos</td></tr>';return;}
+  tbody.innerHTML=f.map(function(m){
+    var d=diasHastaVencer(m.vencimiento);var vcls=d<=0?'vence-crit':d<=30?'vence-warn':'vence-ok';var vt=d<=0?'VENCIDO':d<=30?d+'d':'OK';
+    var est=m.stock<=0?'<span class="badge badge-red">Sin stock</span>':m.stock<=(m.stockMin||5)?'<span class="badge badge-warn">Stock bajo</span>':'<span class="badge badge-green">Normal</span>';
+    return '<tr><td class="med-name"><span style="margin-right:5px">'+(m.emoji||'&#x1F48A;')+'</span>'+m.nombre+'<div style="font-size:10px;color:var(--text3)">'+(m.activo||'')+'</div></td>'+'<td><span class="badge badge-blue">'+m.categoria+'</span></td><td style="font-size:11px;color:var(--text3)">'+(m.lote||'-')+'</td><td class="'+vcls+'">'+fmtDate(m.vencimiento)+'<br><span style="font-size:10px">'+vt+'</span></td><td>$'+fmt(m.costo)+'</td><td style="color:var(--text);font-weight:600">$'+fmt(m.precio)+'</td><td style="color:var(--neon)">'+fmtLocal(m.precio*STATE.tasa)+'</td><td style="color:var(--text);font-weight:600">'+m.stock+' uds</td><td>'+est+'</td><td><div style="display:flex;gap:5px"><button onclick="openAddMed('+m.id+')" class="btn btn-sm btn-ghost" style="padding:4px 7px">Ed</button><button onclick="deleteMed('+m.id+')" class="btn btn-sm btn-danger" style="padding:4px 7px">Del</button></div></td></tr>';
+  }).join('');
+}
+function openAddMed(id){
+  document.getElementById('modalMedTitle').textContent=id?'Editar Medicamento':'Nuevo Medicamento';
+  if(id){var meds=DB.get('medicamentos')||[];var m=meds.find(function(x){return x.id===id;});if(!m)return;
+    document.getElementById('med-id').value=m.id;document.getElementById('med-nombre').value=m.nombre;document.getElementById('med-activo').value=m.activo||'';document.getElementById('med-emoji').value=m.emoji||'';document.getElementById('med-categoria').value=m.categoria;document.getElementById('med-presentacion').value=m.presentacion||'';document.getElementById('med-codigo').value=m.codigo||'';document.getElementById('med-lote').value=m.lote||'';document.getElementById('med-vencimiento').value=m.vencimiento||'';document.getElementById('med-ubicacion').value=m.ubicacion||'';document.getElementById('med-receta').value=m.receta||'no';document.getElementById('med-costo').value=m.costo;document.getElementById('med-precio').value=m.precio;document.getElementById('med-stock').value=m.stock;document.getElementById('med-stockMin').value=m.stockMin||5;document.getElementById('med-ganancia').value=m.costo>0?Math.round(((m.precio-m.costo)/m.costo)*100):'';calcBsMed();
+  } else {
+    ['med-id','med-nombre','med-activo','med-emoji','med-codigo','med-lote','med-vencimiento','med-ubicacion','med-costo','med-precio','med-stock','med-ganancia'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});
+    document.getElementById('med-categoria').value='Analgesicos';document.getElementById('med-emoji').value='&#x1F48A;';document.getElementById('med-presentacion').value='Caja x10 tabletas';document.getElementById('med-receta').value='no';document.getElementById('med-stockMin').value='5';document.getElementById('med-precio-local').value='';
+  }
+  openModal('modalMed');
+}
+function setGanancia(pct){document.getElementById('med-ganancia').value=pct;calcPrecioMed();}
+function calcPrecioMed(){var c=parseFloat(document.getElementById('med-costo').value)||0;var p=parseFloat(document.getElementById('med-ganancia').value)||0;if(c>0&&p>0){document.getElementById('med-precio').value=(c*(1+p/100)).toFixed(2);calcBsMed();}}
+function calcBsMed(){var p=parseFloat(document.getElementById('med-precio').value)||0;var lbl=document.getElementById('lbl-precio-local');if(lbl)lbl.textContent='Precio '+(STATE.simboloLocal||'Bs');var el=document.getElementById('med-precio-local');if(el)el.value=fmtLocal(p*STATE.tasa);}
+function saveMed(){
+  var nombre=document.getElementById('med-nombre').value.trim();var venc=document.getElementById('med-vencimiento').value;
+  if(!nombre)return showToast('El nombre es obligatorio','warn');if(!venc)return showToast('Fecha de vencimiento obligatoria','warn');
+  var precio=parseFloat(document.getElementById('med-precio').value)||0;if(precio<=0)return showToast('El precio es obligatorio','warn');
+  var idVal=document.getElementById('med-id').value;
+  var med={id:idVal?parseInt(idVal):Date.now(),nombre:nombre,activo:document.getElementById('med-activo').value,emoji:document.getElementById('med-emoji').value||'&#x1F48A;',categoria:document.getElementById('med-categoria').value,presentacion:document.getElementById('med-presentacion').value,codigo:document.getElementById('med-codigo').value,lote:document.getElementById('med-lote').value,vencimiento:venc,ubicacion:document.getElementById('med-ubicacion').value,receta:document.getElementById('med-receta').value,costo:parseFloat(document.getElementById('med-costo').value)||0,precio:precio,stock:parseInt(document.getElementById('med-stock').value)||0,stockMin:parseInt(document.getElementById('med-stockMin').value)||5};
+  var meds=DB.get('medicamentos')||[];
+  if(idVal){var idx=meds.findIndex(function(x){return x.id===med.id;});if(idx>=0)meds[idx]=med;else meds.push(med);}else meds.push(med);
+  DB.set('medicamentos',meds);closeModal('modalMed');renderInventario();showToast('Medicamento guardado','success');
+}
+function deleteMed(id){if(!confirm('Eliminar este medicamento?'))return;var meds=DB.get('medicamentos')||[];DB.set('medicamentos',meds.filter(function(m){return m.id!==id;}));renderInventario();showToast('Eliminado','success');}
+
+// ALERTAS
+function renderAlertas(){
+  var meds=DB.get('medicamentos')||[];
+  var vencidos=meds.filter(function(m){return diasHastaVencer(m.vencimiento)<=0;});
+  var proxV=meds.filter(function(m){var d=diasHastaVencer(m.vencimiento);return d>0&&d<=30;});
+  var sinSt=meds.filter(function(m){return m.stock<=0;});
+  var stBj=meds.filter(function(m){return m.stock>0&&m.stock<=(m.stockMin||5);});
+  var ac=document.getElementById('alertasContent');if(!ac)return;
+  var html='';
+  function waBtn(m){return '<button onclick="enviarAlertaWhatsApp(\''+m.nombre.replace(/'/g,'')+'\',\''+fmtDate(m.vencimiento)+'\',\''+( m.lote||'N/A')+'\')" style="background:#25D366;border:none;border-radius:7px;color:#fff;font-size:11px;padding:4px 8px;cursor:pointer;margin-top:5px">&#x1F4F1; WhatsApp</button>';}
+  if(vencidos.length){html+='<div class="card mb-4"><div class="card-title mb-3" style="color:var(--danger)">VENCIDOS ('+vencidos.length+')</div>'+vencidos.map(function(m){return '<div class="alerta-card"><div class="alerta-icon">&#x1F48A;</div><div class="alerta-info"><div class="alerta-title">'+m.nombre+'</div><div class="alerta-desc">'+m.presentacion+' - Lote: '+(m.lote||'N/A')+'</div><div class="alerta-fecha" style="color:var(--danger)">Vencio el '+fmtDate(m.vencimiento)+'</div>'+waBtn(m)+'</div></div>';}).join('')+'</div>';}
+  if(proxV.length){html+='<div class="card mb-4"><div class="card-title mb-3" style="color:var(--warn)">PROXIMOS A VENCER ('+proxV.length+')</div>'+proxV.sort(function(a,b){return diasHastaVencer(a.vencimiento)-diasHastaVencer(b.vencimiento);}).map(function(m){var d=diasHastaVencer(m.vencimiento);return '<div class="alerta-card warn"><div class="alerta-icon">&#x23F0;</div><div class="alerta-info"><div class="alerta-title">'+m.nombre+'</div><div class="alerta-desc">'+m.presentacion+' - Stock: '+m.stock+'</div><div class="alerta-fecha" style="color:var(--warn)">Vence en '+d+' dia'+(d!==1?'s':'')+' - '+fmtDate(m.vencimiento)+'</div>'+waBtn(m)+'</div></div>';}).join('')+'</div>';}
+  if(sinSt.length){html+='<div class="card mb-4"><div class="card-title mb-3" style="color:var(--danger)">SIN STOCK ('+sinSt.length+')</div>'+sinSt.map(function(m){return '<div class="alerta-card"><div class="alerta-icon">&#x1F4E6;</div><div class="alerta-info"><div class="alerta-title">'+m.nombre+'</div><div class="alerta-desc">'+m.presentacion+'</div><div class="alerta-fecha" style="color:var(--danger)">Stock agotado</div></div></div>';}).join('')+'</div>';}
+  if(stBj.length){html+='<div class="card mb-4"><div class="card-title mb-3" style="color:var(--warn)">STOCK BAJO ('+stBj.length+')</div>'+stBj.map(function(m){return '<div class="alerta-card warn"><div class="alerta-icon">&#x26A0;&#xFE0F;</div><div class="alerta-info"><div class="alerta-title">'+m.nombre+'</div><div class="alerta-desc">'+m.presentacion+'</div><div class="alerta-fecha" style="color:var(--warn)">Stock: '+m.stock+' / Min: '+m.stockMin+'</div></div></div>';}).join('')+'</div>';}
+  if(!html)html='<div class="section-empty"><div class="e-icon">&#x2705;</div><p>Sin alertas - Todo en orden</p></div>';
+  ac.innerHTML=html;
+}
+
+// RECETAS
+function renderRecetas(){var recs=DB.get('recetas')||[];var tbody=document.getElementById('recetasTable');if(!tbody)return;if(!recs.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--text2)">Sin recetas</td></tr>';return;}tbody.innerHTML=recs.slice().reverse().map(function(r,i){return '<tr><td>#'+(recs.length-i)+'</td><td>'+fmtDate(r.fecha)+'</td><td class="med-name">'+r.paciente+'</td><td>'+r.medico+'</td><td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+r.medicamentos+'</td><td><button onclick="deleteReceta('+r.id+')" class="btn btn-sm btn-danger" style="padding:4px 7px">Del</button></td></tr>';}).join('');}
+function openAddReceta(){['rec-paciente','rec-ci','rec-medico','rec-meds','rec-notas'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});document.getElementById('rec-fecha').value=new Date().toISOString().split('T')[0];openModal('modalReceta');}
+function saveReceta(){var pac=document.getElementById('rec-paciente').value.trim();if(!pac)return showToast('El paciente es obligatorio','warn');var rec={id:Date.now(),paciente:pac,ci:document.getElementById('rec-ci').value,medico:document.getElementById('rec-medico').value,fecha:document.getElementById('rec-fecha').value,medicamentos:document.getElementById('rec-meds').value,notas:document.getElementById('rec-notas').value};var recs=DB.get('recetas')||[];recs.push(rec);DB.set('recetas',recs);closeModal('modalReceta');renderRecetas();showToast('Receta guardada','success');}
+function deleteReceta(id){if(!confirm('Eliminar receta?'))return;var recs=DB.get('recetas')||[];DB.set('recetas',recs.filter(function(r){return r.id!==id;}));renderRecetas();}
+
+// CLIENTES
+function renderClientes(){var cls=DB.get('clientes')||[];var q=(document.getElementById('clienteSearch')||{}).value||'';var f=cls.filter(function(c){return!q||c.nombre.toLowerCase().includes(q.toLowerCase());});var tbody=document.getElementById('clientesTable');if(!tbody)return;if(!f.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--text2)">Sin clientes</td></tr>';return;}tbody.innerHTML=f.map(function(c){return '<tr><td class="med-name">'+c.nombre+'</td><td>'+c.telefono+'</td><td>'+c.ci+'</td><td style="color:'+(c.deuda>0?'var(--danger)':'var(--neon)')+'">$'+fmt(c.deuda||0)+'</td><td>'+(c.ultimaCompra?fmtDate(c.ultimaCompra):'-')+'</td><td><div style="display:flex;gap:5px"><button onclick="openAddCliente('+c.id+')" class="btn btn-sm btn-ghost" style="padding:4px 7px">Ed</button><button onclick="deleteCliente('+c.id+')" class="btn btn-sm btn-danger" style="padding:4px 7px">Del</button></div></td></tr>';}).join('');}
+function openAddCliente(id){document.getElementById('modalClienteTitle').textContent=id?'Editar Cliente':'Nuevo Cliente';if(id){var cls=DB.get('clientes')||[];var c=cls.find(function(x){return x.id===id;});if(!c)return;document.getElementById('cli-id').value=c.id;document.getElementById('cli-nombre').value=c.nombre;document.getElementById('cli-tel').value=c.telefono||'';document.getElementById('cli-ci').value=c.ci||'';document.getElementById('cli-limite').value=c.limite||20;document.getElementById('cli-notas').value=c.notas||'';}else{['cli-id','cli-nombre','cli-tel','cli-ci','cli-notas'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});document.getElementById('cli-limite').value='20';}openModal('modalCliente');}
+function saveCliente(){var nombre=document.getElementById('cli-nombre').value.trim();if(!nombre)return showToast('Nombre obligatorio','warn');var idVal=document.getElementById('cli-id').value;var cli={id:idVal?parseInt(idVal):Date.now(),nombre:nombre,telefono:document.getElementById('cli-tel').value,ci:document.getElementById('cli-ci').value,limite:parseFloat(document.getElementById('cli-limite').value)||20,deuda:0,notas:document.getElementById('cli-notas').value,ultimaCompra:null};var cls=DB.get('clientes')||[];if(idVal){var idx=cls.findIndex(function(x){return x.id===cli.id;});if(idx>=0){cli.deuda=cls[idx].deuda||0;cli.ultimaCompra=cls[idx].ultimaCompra;cls[idx]=cli;}else cls.push(cli);}else cls.push(cli);DB.set('clientes',cls);closeModal('modalCliente');renderClientes();showToast('Cliente guardado','success');}
+function deleteCliente(id){if(!confirm('Eliminar cliente?'))return;var cls=DB.get('clientes')||[];DB.set('clientes',cls.filter(function(c){return c.id!==id;}));renderClientes();}
+
+// HISTORIAL
+function renderHistorial(){
+  var ventas=DB.get('ventas')||[];var hoy=new Date().toDateString();
+  var vh=ventas.filter(function(v){return new Date(v.fecha).toDateString()===hoy;});var th=vh.reduce(function(a,v){return a+v.totalUSD;},0);
+  var tm=ventas.reduce(function(a,v){var d=new Date(v.fecha);var n=new Date();return(d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear())?a+v.totalUSD:a;},0);
+  var hs=document.getElementById('histStats');
+  if(hs)hs.innerHTML=[{label:'Total Hoy',val:'$'+fmt(th),sub:vh.length+' trans.',cls:'blue'},{label:'Total Mes',val:'$'+fmt(tm),sub:ventas.length+' total',cls:'green'},{label:'Total General',val:'$'+fmt(ventas.reduce(function(a,v){return a+v.totalUSD;},0)),sub:'Historial',cls:'blue'},{label:'Ticket Prom.',val:'$'+fmt(ventas.length?ventas.reduce(function(a,v){return a+v.totalUSD;},0)/ventas.length:0),sub:'Promedio',cls:'green'}].map(function(s){return '<div class="stat-card '+s.cls+'"><div class="stat-label">'+s.label+'</div><div class="stat-val '+(s.cls==='blue'?'blue':'green')+'">'+s.val+'</div><div class="stat-sub">'+s.sub+'</div></div>';}).join('');
+  var tbody=document.getElementById('histTable');if(!tbody)return;
+  if(!ventas.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text2)">Sin ventas</td></tr>';return;}
+  tbody.innerHTML=ventas.slice().reverse().map(function(v){var prods=v.items&&v.items.length?v.items.map(function(it){return it.nombre;}).join(', '):'-';return '<tr><td style="font-size:11px;color:var(--text3)">#'+v.id.toString().slice(-5)+'</td><td>'+fmtDate(v.fecha)+'<br><span style="font-size:10px;color:var(--text3)">'+fmtTime(v.fecha)+'</span></td><td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+prods+'</td><td><span class="badge badge-blue">'+v.metodo+'</span></td><td style="color:var(--neon);font-weight:700">$'+fmt(v.totalUSD)+'</td><td style="color:var(--text2)">'+fmtLocal(v.totalLocal||v.totalUSD*STATE.tasa)+'</td><td><button onclick="deleteVenta('+v.id+')" class="btn btn-sm btn-danger" style="padding:4px 7px">Del</button></td></tr>';}).join('');
+}
+function deleteVenta(id){if(!confirm('Eliminar venta?'))return;var ventas=DB.get('ventas')||[];DB.set('ventas',ventas.filter(function(v){return v.id!==id;}));renderHistorial();}
+
+// PROVEEDORES
+function renderProveedores(){var provs=DB.get('proveedores')||[];var tbody=document.getElementById('provTable');if(!tbody)return;if(!provs.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--text2)">Sin proveedores</td></tr>';return;}tbody.innerHTML=provs.map(function(p){return '<tr><td class="med-name">'+p.nombre+'</td><td>'+p.contacto+'</td><td>'+p.telefono+'</td><td><span class="badge badge-purple">'+p.especialidad+'</span></td><td><button onclick="deleteProv('+p.id+')" class="btn btn-sm btn-danger" style="padding:4px 7px">Del</button></td></tr>';}).join('');}
+function openAddProveedor(){['prov-id','prov-nombre','prov-contacto','prov-tel','prov-especialidad'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});openModal('modalProv');}
+function saveProveedor(){var nombre=document.getElementById('prov-nombre').value.trim();if(!nombre)return showToast('Nombre obligatorio','warn');var p={id:Date.now(),nombre:nombre,contacto:document.getElementById('prov-contacto').value,telefono:document.getElementById('prov-tel').value,especialidad:document.getElementById('prov-especialidad').value};var provs=DB.get('proveedores')||[];provs.push(p);DB.set('proveedores',provs);closeModal('modalProv');renderProveedores();showToast('Proveedor guardado','success');}
+function deleteProv(id){if(!confirm('Eliminar proveedor?'))return;var provs=DB.get('proveedores')||[];DB.set('proveedores',provs.filter(function(p){return p.id!==id;}));renderProveedores();}
+
+// REPORTES
+function renderReportes(){
+  var ventas=DB.get('ventas')||[];var tv=ventas.reduce(function(a,v){return a+v.totalUSD;},0);var tg=ventas.reduce(function(a,v){return a+(v.totalUSD-(v.costoTotal||0));},0);
+  var rs=document.getElementById('reporteStats');
+  if(rs)rs.innerHTML=[{label:'Total Vendido',val:'$'+fmt(tv),cls:'blue'},{label:'Ganancia Total',val:'$'+fmt(tg),cls:'green'},{label:'Margen Prom.',val:(tv>0?((tg/tv)*100).toFixed(1):0)+'%',cls:'blue'},{label:'Transacciones',val:ventas.length,cls:'green'}].map(function(s){return '<div class="stat-card '+s.cls+'"><div class="stat-label">'+s.label+'</div><div class="stat-val '+(s.cls==='blue'?'blue':'green')+'">'+s.val+'</div></div>';}).join('');
+  var cats={};ventas.forEach(function(v){(v.items||[]).forEach(function(it){var meds=DB.get('medicamentos')||[];var m=meds.find(function(x){return x.id===it.id;});var cat=m?m.categoria:'Otros';cats[cat]=(cats[cat]||0)+it.subtotal;});});
+  var canvas=document.getElementById('chartCategorias');
+  if(canvas){if(STATE.charts.cats)STATE.charts.cats.destroy();var labels=Object.keys(cats);var data=Object.values(cats);var colors=['#00c8ff','#00e5a0','#ffb347','#ff4d6d','#a855f7','#4fc3f7','#00ffb3','#ff9800'];STATE.charts.cats=new Chart(canvas,{type:'doughnut',data:{labels:labels,datasets:[{data:data,backgroundColor:colors.slice(0,labels.length),borderColor:'var(--bg)',borderWidth:2}]},options:{responsive:true,plugins:{legend:{labels:{color:'#7a9fc0',font:{size:11}}}}}});}
+  var cont={};ventas.forEach(function(v){(v.items||[]).forEach(function(it){cont[it.nombre]=(cont[it.nombre]||0)+it.qty;});});var top=Object.entries(cont).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  var tm=document.getElementById('topMedsReporte');
+  if(tm){if(!top.length)tm.innerHTML='<div class="section-empty" style="padding:18px"><p>Sin datos</p></div>';else tm.innerHTML=top.map(function(t){var pct=top[0][1]>0?Math.round((t[1]/top[0][1])*100):0;return '<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--text);font-weight:600">'+t[0]+'</span><span style="color:var(--text2)">'+t[1]+' uds</span></div><div style="background:var(--bg3);border-radius:4px;height:5px"><div style="background:linear-gradient(90deg,#00c8ff,#00e5a0);height:5px;border-radius:4px;width:'+pct+'%"></div></div></div>';}).join('');}
+}
+
+// CONFIGURACION
+function renderConfiguracion(){
+  var cfg=DB.get('config')||{};
+  [{f:'cfg-negocio',k:'negocio'},{f:'cfg-direccion',k:'direccion'},{f:'cfg-telefono',k:'telefono'},{f:'cfg-rif',k:'rif'}].forEach(function(e){var el=document.getElementById(e.f);if(el&&cfg[e.k])el.value=cfg[e.k];});
+  var tEl=document.getElementById('cfg-tasa');if(tEl)tEl.value=STATE.tasa;
+  var pEl=document.getElementById('cfg-pais');if(pEl)pEl.value=STATE.pais||'VE';
+  var p=PAISES[STATE.pais||'VE']||PAISES['VE'];
+  var bd=document.getElementById('pais-bandera-display');if(bd)bd.textContent=p.nombre;
+  var md=document.getElementById('pais-moneda-display');if(md)md.textContent=p.simboloLocal+' ('+p.monedaLocalNombre+')';
+  var lt=document.getElementById('lbl-tasa-local');if(lt)lt.textContent=p.tasaLabel;
+  renderPayMethodsConfig();
+}
+function saveConfig(){var cfg=DB.get('config')||{};cfg.negocio=document.getElementById('cfg-negocio').value;cfg.direccion=document.getElementById('cfg-direccion').value;cfg.telefono=document.getElementById('cfg-telefono').value;cfg.rif=document.getElementById('cfg-rif').value;cfg.tasa=STATE.tasa;cfg.pais=STATE.pais||'VE';DB.set('config',cfg);showToast('Configuracion guardada','success');}
+function saveTasa(){var tasa=parseFloat(document.getElementById('cfg-tasa').value);if(!tasa||tasa<=0)return showToast('Ingresa una tasa valida','warn');STATE.tasa=tasa;var cfg=DB.get('config')||{};cfg.tasa=tasa;DB.set('config',cfg);try{renderInventario();}catch(e){}try{renderCart();}catch(e){}try{renderDashboard();}catch(e){}showToast('Tasa actualizada: '+fmtLocal(1)+' por $1','success');}
+function aplicarPais(paisCode){
+  var p=PAISES[paisCode];if(!p)return;
+  STATE.pais=paisCode;STATE.tasa=p.tasaDefault;STATE.simboloLocal=p.simboloLocal;STATE.simboloRef=p.simboloRef||'$';
+  var cfg=DB.get('config')||{};cfg.pais=paisCode;cfg.tasa=p.tasaDefault;cfg.simboloLocal=p.simboloLocal;DB.set('config',cfg);
+  DB.del('payMethods');window.PAY_METHODS=p.metodos.slice();
+  var bd=document.getElementById('pais-bandera-display');if(bd)bd.textContent=p.nombre;
+  var md=document.getElementById('pais-moneda-display');if(md)md.textContent=p.simboloLocal+' ('+p.monedaLocalNombre+')';
+  var lt=document.getElementById('lbl-tasa-local');if(lt)lt.textContent=p.tasaLabel;
+  var ti=document.getElementById('cfg-tasa');if(ti){ti.value=p.tasaDefault;ti.placeholder=p.tasaPlaceholder;}
+  renderPayMethodsConfig();renderPaymentBtns();showToast(p.nombre+' - Moneda: '+p.monedaLocalNombre+' ('+p.simboloLocal+')','success');
+}
+function renderPayMethodsConfig(){
+  var p=PAISES[STATE.pais||'VE']||PAISES['VE'];var metodos=window.PAY_METHODS&&window.PAY_METHODS.length>0?window.PAY_METHODS:p.metodos;var active=DB.get('payMethods')||metodos.map(function(m){return m.id;});var el=document.getElementById('payMethodsConfig');if(!el)return;
+  el.innerHTML=metodos.map(function(m){var cls=m.currency==='USD'?'badge-green':m.currency==='MIX'?'badge-gray':'badge-blue';var lbl=m.currency==='LOCAL'?p.simboloLocal:m.currency;return '<label style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer"><input type="checkbox" value="'+m.id+'" '+(active.includes(m.id)?'checked':'')+' style="width:15px;height:15px;accent-color:var(--accent)"><span style="font-size:14px">'+m.icon+'</span><span style="flex:1">'+m.label+'</span><span class="badge '+cls+'">'+lbl+'</span></label>';}).join('');
+}
+function savePayMethods(){var checks=document.querySelectorAll('#payMethodsConfig input[type=checkbox]');var active=[];checks.forEach(function(c){if(c.checked)active.push(c.value);});DB.set('payMethods',active);renderPaymentBtns();showToast('Metodos guardados','success');}
+
+// RESET
+function resetearDatos(){if(!confirm('Borrar todas las ventas?'))return;['ventas','recetas','clientes'].forEach(function(k){DB.del(k);});try{['ventas','recetas','clientes'].forEach(function(k){localStorage.removeItem('fp_'+k);});}catch(e){}showToast('Ventas borradas','success');renderDashboard();}
+function resetearTodo(){if(!confirm('BORRAR TODO? Irreversible.'))return;['medicamentos','ventas','recetas','clientes','config','proveedores','payMethods','license','session'].forEach(function(k){DB.del(k);});try{var td=[];for(var i=0;i<localStorage.length;i++){var key=localStorage.key(i);if(key&&key.startsWith('fp_'))td.push(key);}td.forEach(function(k){localStorage.removeItem(k);});}catch(e){}showToast('App reseteada. Recargando...','success');setTimeout(function(){location.reload();},1500);}
+
+// DATOS DE MUESTRA
+function loadSampleData(){
+  function addDays(n){var x=new Date();x.setDate(x.getDate()+n);return x.toISOString().split('T')[0];}
+  DB.set('medicamentos',[
+    {id:1,nombre:'Paracetamol 500mg',activo:'Acetaminofen',emoji:'&#x1F48A;',categoria:'Analgesicos',presentacion:'Caja x10 tabletas',codigo:'7591234001',lote:'LOT-2024-001',vencimiento:addDays(365),ubicacion:'A-1',receta:'no',costo:.80,precio:1.50,stock:120,stockMin:20},
+    {id:2,nombre:'Ibuprofeno 400mg',activo:'Ibuprofeno',emoji:'&#x1F525;',categoria:'Antiinflamatorios',presentacion:'Caja x20 tabletas',codigo:'7591234002',lote:'LOT-2024-002',vencimiento:addDays(180),ubicacion:'A-2',receta:'no',costo:1.20,precio:2.50,stock:85,stockMin:15},
+    {id:3,nombre:'Amoxicilina 500mg',activo:'Amoxicilina',emoji:'&#x1F9A0;',categoria:'Antibioticos',presentacion:'Caja x10 tabletas',codigo:'7591234003',lote:'LOT-2024-003',vencimiento:addDays(15),ubicacion:'B-1',receta:'si',costo:3.50,precio:6.00,stock:30,stockMin:10},
+    {id:4,nombre:'Vitamina C 1000mg',activo:'Acido Ascorbico',emoji:'&#x1F31F;',categoria:'Vitaminas',presentacion:'Frasco 30 tabletas',codigo:'7591234004',lote:'LOT-2024-004',vencimiento:addDays(500),ubicacion:'C-1',receta:'no',costo:2.00,precio:4.50,stock:45,stockMin:10},
+    {id:5,nombre:'Metformina 850mg',activo:'Metformina HCl',emoji:'&#x1FA7A;',categoria:'Diabetes',presentacion:'Caja x30 tabletas',codigo:'7591234005',lote:'LOT-2024-005',vencimiento:addDays(-5),ubicacion:'D-1',receta:'si',costo:2.50,precio:5.00,stock:8,stockMin:15},
+    {id:6,nombre:'Salbutamol Inhaler',activo:'Salbutamol',emoji:'&#x1FAC1;',categoria:'Respiratorio',presentacion:'Frasco 120ml',codigo:'7591234006',lote:'LOT-2024-006',vencimiento:addDays(200),ubicacion:'B-3',receta:'si',costo:4.00,precio:8.00,stock:0,stockMin:5},
+    {id:7,nombre:'Loratadina 10mg',activo:'Loratadina',emoji:'&#x1F48A;',categoria:'Analgesicos',presentacion:'Caja x10 tabletas',codigo:'7591234007',lote:'LOT-2024-007',vencimiento:addDays(300),ubicacion:'A-3',receta:'no',costo:.50,precio:1.20,stock:60,stockMin:10},
+    {id:8,nombre:'Omeprazol 20mg',activo:'Omeprazol',emoji:'&#x1FAC3;',categoria:'Digestivo',presentacion:'Caja x14 tabletas',codigo:'7591234008',lote:'LOT-2024-008',vencimiento:addDays(400),ubicacion:'C-2',receta:'no',costo:1.80,precio:3.50,stock:40,stockMin:10},
+  ]);
+  DB.set('ventas',[]);DB.set('clientes',[]);DB.set('recetas',[]);
+  DB.set('proveedores',[{id:1,nombre:'Laboratorios Bayer Venezuela',contacto:'Andres Mendez',telefono:'0212-800-2939',especialidad:'Analgesicos y Cardiovascular'},{id:2,nombre:'Pfizer Venezuela',contacto:'Maria Gonzalez',telefono:'0212-955-1000',especialidad:'Antibioticos y Vacunas'}]);
+}
+
+// MOBILE
+function toggleMobileSidebar(){var sb=document.getElementById('sidebar');var ov=document.getElementById('sidebarOverlay');if(sb)sb.classList.toggle('mobile-open');if(ov)ov.classList.toggle('show');}
+function closeMobileSidebar(){var sb=document.getElementById('sidebar');var ov=document.getElementById('sidebarOverlay');if(sb)sb.classList.remove('mobile-open');if(ov)ov.classList.remove('show');}
+function toggleTheme(){
+  var t=document.documentElement.getAttribute('data-theme');
+  var isDark=t==='dark';
+  document.documentElement.setAttribute('data-theme',isDark?'':'dark');
+  var btn=document.querySelector('.theme-toggle');
+  if(btn)btn.textContent=isDark?'🌙':'☀️';
+}
+
+// ALERTAS WHATSAPP
+function enviarAlertaWhatsApp(nombre,vencimiento,lote){
+  var cfg=DB.get('config')||{};
+  var msg='⚠️ ALERTA FARMACIA\n\n🏥 '+(cfg.negocio||'Farmacia Pro')+'\n\n💊 Medicamento: '+nombre+'\n📦 Lote: '+(lote||'N/A')+'\n📅 Vencimiento: '+vencimiento+'\n\nSe requiere accion inmediata.\n\nA2K Digital Studio';
+  var tel=(cfg.telefono||'').replace(/\D/g,'');
+  window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+// INIT SESSION
+window.addEventListener('DOMContentLoaded',function(){
+  var ses=DB.get('session');var lic=DB.get('license');
+  if(ses&&lic&&lic.deviceId===DEVICE_ID){
+    var cfg=DB.get('config')||{};if(cfg.tasa>0)STATE.tasa=cfg.tasa;
+    if(cfg.pais&&PAISES[cfg.pais]){STATE.pais=cfg.pais;STATE.simboloLocal=PAISES[cfg.pais].simboloLocal;STATE.simboloRef=PAISES[cfg.pais].simboloRef||'$';window.PAY_METHODS=PAISES[cfg.pais].metodos.slice();}
+    STATE.user=ses;
+    document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='flex';
+    var av=document.getElementById('userAvatar');if(av)av.textContent=ses.negocio[0].toUpperCase();
+    var un=document.getElementById('userName');if(un)un.textContent=ses.negocio;
+    var un2=document.getElementById('userName2');if(un2)un2.textContent=ses.user;
+    document.getElementById('licenseDeviceId').textContent='Device ID: '+DEVICE_ID;
+    var lt=document.getElementById('licTipo');if(lt)lt.textContent=lic.esDemo?'DEMO':'PRO';
+    var d=new Date();var pd=document.getElementById('pageDate');if(pd)pd.textContent=d.toLocaleDateString('es-VE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    if(window.innerWidth<=768){var mb=document.getElementById('mobileMenuBtn');if(mb)mb.style.display='flex';}
+    if(!DB.get('medicamentos'))loadSampleData();
+    if(lic.esDemo){var vence=new Date(lic.venceEn);if(new Date()>vence){mostrarPantallaBloqueo(lic,vence);return;}}
+    initOfflineMode();
+    renderPaymentBtns();showPage('dashboard');
+  }
+  var lnPass=document.getElementById('ln-pass');
+  if(lnPass)lnPass.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+});
+
+// EXPONER FUNCIONES
+window.doLogin=doLogin;window.doLogout=doLogout;window.confirmarLogout=confirmarLogout;
+window.showPage=showPage;window.abrirAdminModal=abrirAdminModal;window.cerrarModalAdmin=cerrarModalAdmin;window.verificarPasswordAdmin=verificarPasswordAdmin;
+window.switchLicTab=switchLicTab;window.actualizarFechaDemo=actualizarFechaDemo;
+window.generarLicencia=generarLicencia;window.generarLicenciaDemo=generarLicenciaDemo;
+window.copiarCodigo=copiarCodigo;window.compartirUltimaLicencia=compartirUltimaLicencia;
+window.compartirUltimaDemo=compartirUltimaDemo;window.compartirLic=compartirLic;
+window.renderLicTable=renderLicTable;window.activarConCodigoPro=activarConCodigoPro;
+window.openAddMed=openAddMed;window.saveMed=saveMed;window.deleteMed=deleteMed;
+window.openAddReceta=openAddReceta;window.saveReceta=saveReceta;window.deleteReceta=deleteReceta;
+window.openAddCliente=openAddCliente;window.saveCliente=saveCliente;window.deleteCliente=deleteCliente;
+window.openAddProveedor=openAddProveedor;window.saveProveedor=saveProveedor;window.deleteProv=deleteProv;
+window.deleteVenta=deleteVenta;
+window.addToCart=addToCart;window.removeFromCart=removeFromCart;window.changeQty=changeQty;
+window.clearCart=clearCart;window.selPago=selPago;window.procesarVenta=procesarVenta;
+window.selCobroMetodo=selCobroMetodo;window.agregarPagoMixto=agregarPagoMixto;
+window.renderPagosMixtos=renderPagosMixtos;window.actualizarRemanente=actualizarRemanente;
+window.calcularVuelto=calcularVuelto;window.confirmarCobroFinal=confirmarCobroFinal;
+window.mostrarTicket=mostrarTicket;window.imprimirTicket58mm=imprimirTicket58mm;
+window.enviarTicketWhatsApp=enviarTicketWhatsApp;
+window.mostrarCierreDiario=mostrarCierreDiario;window.enviarCierreWhatsApp=enviarCierreWhatsApp;
+window.enviarAlertaWhatsApp=enviarAlertaWhatsApp;
+window.saveConfig=saveConfig;window.saveTasa=saveTasa;window.aplicarPais=aplicarPais;
+window.savePayMethods=savePayMethods;window.renderPayMethodsConfig=renderPayMethodsConfig;
+window.renderInventario=renderInventario;window.renderPOS=renderPOS;
+window.resetearDatos=resetearDatos;window.resetearTodo=resetearTodo;
+window.setGanancia=setGanancia;window.calcPrecioMed=calcPrecioMed;window.calcBsMed=calcBsMed;
+window.autoEmojiMed=autoEmojiMed;
+window.toggleMobileSidebar=toggleMobileSidebar;window.closeMobileSidebar=closeMobileSidebar;
+window.toggleTheme=toggleTheme;window.openModal=openModal;window.closeModal=closeModal;
+</script>
+</body>
+</html>
