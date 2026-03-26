@@ -311,6 +311,20 @@ td.med-name{color:var(--text);font-weight:700}
 [data-theme="dark"] .badge-red{background:rgba(255,77,109,0.15);color:#ff4d6d;border-color:rgba(255,77,109,0.3)}
 [data-theme="dark"] .pos-cart{background:#0a1628;border-color:rgba(0,200,255,0.12)}
 [data-theme="dark"] .form-input:focus,[data-theme="dark"] .form-select:focus{border-color:#00c8ff;box-shadow:0 0 0 3px rgba(0,200,255,0.1)}
+/* ── ASISTENTE LÓGICO LOCAL — FARMACIA PRO ── */
+#ia-fab{position:fixed;bottom:90px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#00c8ff,#0080ff);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;z-index:9999;box-shadow:0 4px 15px rgba(0,200,255,0.4);transition:transform 0.2s}
+#ia-fab:hover{transform:scale(1.1)}
+#ia-panel{position:fixed;bottom:160px;right:20px;width:320px;height:430px;background:#0a1628;border:1px solid rgba(0,200,255,0.25);border-radius:16px;display:none;flex-direction:column;z-index:9998;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+#ia-header{background:#0d1f3c;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;color:#00c8ff;font-weight:600;font-size:14px;border-bottom:1px solid rgba(0,200,255,0.15)}
+#ia-header button{background:none;border:none;color:#8A8794;cursor:pointer;font-size:16px;z-index:20000;pointer-events:auto}
+#ia-mensajes{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ia-msg-user{background:linear-gradient(135deg,#00c8ff,#0080ff);color:#fff;padding:8px 12px;border-radius:12px 12px 4px 12px;font-size:13px;align-self:flex-end;max-width:85%}
+.ia-msg-bot{background:#0d1f3c;color:#e8f4fd;padding:8px 12px;border-radius:12px 12px 12px 4px;font-size:13px;align-self:flex-start;max-width:85%;border:1px solid rgba(0,200,255,0.12)}
+.ia-msg-bot.cargando{color:#8A8794;font-style:italic}
+#ia-input-area{padding:10px;border-top:1px solid rgba(0,200,255,0.15);display:flex;gap:8px}
+#ia-input{flex:1;background:#0d1f3c;border:1px solid rgba(0,200,255,0.25);border-radius:8px;color:#e8f4fd;padding:8px 12px;font-size:13px;outline:none}
+#ia-input::placeholder{color:#4a6fa5}
+#ia-input-area button{background:linear-gradient(135deg,#00c8ff,#0080ff);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:16px;font-weight:700}
 </style>
 
 </head>
@@ -2198,6 +2212,217 @@ setInterval(function() {
 }, 300000);
 
 console.log('🔥 Firebase conectado — farmacia-pro / bodega-pro-cloud');
+</script>
+
+<!-- ASISTENTE LÓGICO LOCAL — FARMACIA PRO -->
+<div id="ia-fab" onclick="toggleIA()" title="Asistente Farmacia 💊">💊</div>
+<div id="ia-panel">
+  <div id="ia-header">
+    <span>💊 Asistente Farmacia Pro</span>
+    <button onclick="toggleIA()">✕</button>
+  </div>
+  <div id="ia-mensajes"></div>
+  <div id="ia-input-area">
+    <input type="text" id="ia-input" placeholder="Busca un medicamento..." onkeydown="if(event.key==='Enter')enviarIA()"/>
+    <button onclick="enviarIA()">📤</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ASISTENTE LÓGICO LOCAL — Farmacia Pro
+   Sin API, sin internet. Lee medicamentos de DB/localStorage.
+   ============================================================ */
+function _iaTasa(){
+  try{
+    var t=0;
+    if(typeof STATE!=='undefined') t=parseFloat(STATE.tasa)||0;
+    if(t<=0){var cfg=DB.get('config')||{};t=parseFloat(cfg.tasa)||0;}
+    return t>0?t:649;
+  }catch(e){return 649;}
+}
+function _iaFmt(n){
+  var usd=parseFloat(n||0);
+  var bs=usd*_iaTasa();
+  var bsFmt=bs>=1000000?(bs/1000000).toFixed(1)+'M'
+           :bs>=1000?(bs/1000).toFixed(1)+'k'
+           :Math.round(bs).toLocaleString('es-VE');
+  return '<b>$'+usd.toFixed(2)+'</b>'
+        +'<small style="display:block;color:#4a9abb;font-size:11px;margin-top:1px;margin-left:2px">Bs '+bsFmt+'</small>';
+}
+function _iaEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _iaNorm(s){
+  return String(s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9\s]/g,'').trim();
+}
+function _iaScore(query,nombre){
+  var q=_iaNorm(query),n=_iaNorm(nombre);
+  if(n===q) return 100;
+  if(n.includes(q)||q.includes(n)) return 80;
+  var words=q.split(/\s+/);
+  var hits=words.filter(function(w){return w.length>2&&n.includes(w);});
+  if(hits.length>0) return 40+(hits.length/words.length)*30;
+  return 0;
+}
+function _iaBuscar(query){
+  var meds=DB.get('medicamentos')||[];
+  var res=[];
+  meds.forEach(function(m){
+    var s=_iaScore(query,m.nombre);
+    if(s>0) res.push({m:m,score:s});
+  });
+  return res.sort(function(a,b){return b.score-a.score;});
+}
+function _iaDiasVence(fecha){
+  if(!fecha) return 9999;
+  var hoy=new Date(); hoy.setHours(0,0,0,0);
+  var v=new Date(fecha); v.setHours(0,0,0,0);
+  return Math.round((v-hoy)/(1000*60*60*24));
+}
+function _iaVenceTxt(m){
+  var d=_iaDiasVence(m.vencimiento);
+  if(d<=0) return '🔴 VENCIDO';
+  if(d<=30) return '🟠 Vence en '+d+' días';
+  if(d<=90) return '🟡 Vence en '+Math.round(d/30)+' meses';
+  return '';
+}
+function _iaIntencion(txt){
+  var t=_iaNorm(txt);
+  if(/precio|cuanto cuesta|cuanto vale|cuanto es|a como|a cuanto/.test(t)) return 'precio';
+  if(/stock|cuantos hay|cuantos quedan|hay|tienes|tienen|queda|quedan|disponible/.test(t)) return 'stock';
+  if(/agotado|sin stock|acabado|no hay/.test(t)) return 'agotados';
+  if(/venc|caduc|expi/.test(t)) return 'vencidos';
+  if(/barato|economico|mas barato|menor precio|oferta/.test(t)) return 'baratos';
+  if(/caro|mas caro|mayor precio/.test(t)) return 'caros';
+  if(/categoria|lista|todos|inventario|que tienen|que hay/.test(t)) return 'lista';
+  if(/venta|vendido|mas vendido|top|popular/.test(t)) return 'ventas';
+  if(/hola|buenas|buenos|hey|buen dia/.test(t)) return 'saludo';
+  if(/gracias|thank/.test(t)) return 'gracias';
+  return 'busqueda';
+}
+function _iaResponder(txt){
+  var meds=DB.get('medicamentos')||[];
+  var intent=_iaIntencion(txt);
+
+  if(intent==='saludo'){
+    return '¡Hola! 👋 Soy tu Asistente de Farmacia Pro.\n\nPuedo ayudarte con:\n• 💊 Precio de medicamentos ($ y Bs)\n• 📦 Stock disponible\n• 🔴 Medicamentos vencidos o por vencer\n• 💰 Los más económicos\n• 📋 Resumen del inventario\n\n¿Qué necesitas saber?';
+  }
+  if(intent==='gracias') return '¡Con gusto! 😊 Para lo que necesites.';
+
+  if(intent==='agotados'){
+    var ag=meds.filter(function(m){return m.stock<=0;});
+    if(!ag.length) return '✅ ¡Todos los medicamentos tienen stock!';
+    return '⚠️ Sin stock ('+ag.length+'):\n'+
+      ag.slice(0,8).map(function(m){return '• '+(m.emoji||'💊')+' '+m.nombre;}).join('\n')+
+      (ag.length>8?'\n...y '+(ag.length-8)+' más.':'');
+  }
+
+  if(intent==='vencidos'){
+    var hoy=new Date(); hoy.setHours(0,0,0,0);
+    var venc=meds.filter(function(m){return _iaDiasVence(m.vencimiento)<=30;})
+                 .sort(function(a,b){return _iaDiasVence(a.vencimiento)-_iaDiasVence(b.vencimiento);});
+    if(!venc.length) return '✅ Ningún medicamento vencido ni próximo a vencer en 30 días.';
+    return '⚠️ Vencidos o por vencer ('+venc.length+'):\n'+
+      venc.slice(0,8).map(function(m){
+        var d=_iaDiasVence(m.vencimiento);
+        return (d<=0?'🔴':'🟠')+' '+m.nombre+(d<=0?' — VENCIDO':' — '+d+' días');
+      }).join('\n');
+  }
+
+  if(intent==='baratos'){
+    var sb=[].concat(meds).sort(function(a,b){return a.precio-b.precio;});
+    return '💰 Los 5 más económicos:\n'+
+      sb.slice(0,5).map(function(m,i){return (i+1)+'. '+(m.emoji||'💊')+' '+m.nombre+' → '+_iaFmt(m.precio);}).join('\n');
+  }
+
+  if(intent==='caros'){
+    var sc=[].concat(meds).sort(function(a,b){return b.precio-a.precio;});
+    return '💎 Los 5 más costosos:\n'+
+      sc.slice(0,5).map(function(m,i){return (i+1)+'. '+(m.emoji||'💊')+' '+m.nombre+' → '+_iaFmt(m.precio);}).join('\n');
+  }
+
+  if(intent==='lista'){
+    var cats={};
+    meds.forEach(function(m){var c=m.categoria||'General';if(!cats[c])cats[c]=0;cats[c]++;});
+    return '📦 Inventario Farmacia ('+meds.length+' medicamentos):\n'+
+      Object.keys(cats).map(function(c){return '• '+c+': '+cats[c]+' ítems';}).join('\n');
+  }
+
+  if(intent==='ventas'){
+    var ventas=DB.get('ventas')||[];
+    var ctr={};
+    ventas.forEach(function(v){(v.items||[]).forEach(function(it){var n=it.nombre||it.id;ctr[n]=(ctr[n]||0)+(it.qty||1);});});
+    var rank=Object.keys(ctr).sort(function(a,b){return ctr[b]-ctr[a];}).slice(0,5);
+    if(!rank.length) return '📊 Aún no hay suficientes ventas registradas.';
+    return '🏆 Más vendidos:\n'+rank.map(function(n,i){return (i+1)+'. '+n+' ('+ctr[n]+' uds)';}).join('\n');
+  }
+
+  /* ── Búsqueda de medicamento ── */
+  var res=_iaBuscar(txt);
+  if(!res.length){
+    var sug=meds[Math.floor(Math.random()*meds.length)];
+    var r='🔍 No encontré "'+_iaEsc(txt.trim())+'" en el inventario.';
+    if(sug) r+='\n\nTe ofrezco: '+(sug.emoji||'💊')+' '+sug.nombre+' a '+_iaFmt(sug.precio);
+    return r+'\n\n¿Quieres buscar algo similar?';
+  }
+
+  var m=res[0].m;
+  var stk=m.stock>0?'✅ Hay '+m.stock+' '+(m.unidad||'und')+' disponibles.':'⚠️ Agotado (stock: 0).';
+  var venceTxt=_iaVenceTxt(m);
+  var resp;
+
+  if(intent==='precio'){
+    resp='💊 '+m.nombre+': '+_iaFmt(m.precio);
+    if(m.stock<=0) resp+='\n⚠️ (está agotado actualmente)';
+    if(venceTxt) resp+='\n'+venceTxt;
+  } else if(intent==='stock'){
+    resp=m.stock>0?'✅ '+m.nombre+': quedan '+m.stock+' '+(m.unidad||'und')+'.':'❌ '+m.nombre+' está agotado.';
+  } else {
+    resp=(m.emoji||'💊')+' '+m.nombre+'\n💵 Precio: '+_iaFmt(m.precio)+'\n'+stk;
+    if(venceTxt) resp+='\n'+venceTxt;
+    if(res.length>1){
+      var alt=res.slice(1,3).map(function(r){return '  • '+(r.m.emoji||'💊')+' '+r.m.nombre+' → '+_iaFmt(r.m.precio);});
+      resp+='\n\n📋 También tengo:\n'+alt.join('\n');
+    }
+  }
+  if(m.stock>0&&m.stockMin>0&&m.stock<=m.stockMin) resp+='\n⚡ Stock bajo — pocas unidades.';
+  return resp;
+}
+
+function toggleIA(){
+  var p=document.getElementById('ia-panel');
+  p.style.display=p.style.display==='flex'?'none':'flex';
+  if(p.style.display==='flex'){
+    document.getElementById('ia-input').focus();
+    if(!document.getElementById('ia-mensajes').children.length){
+      agregarMensajeIA('bot','¡Hola! Soy tu Asistente de Farmacia Pro 💊\n\nFunciono SIN internet — leo directo tu inventario.\n\nPregúntame por precios ($ y Bs), stock, vencimientos o los más baratos.\n\n¿En qué te ayudo?');
+    }
+  }
+}
+function agregarMensajeIA(tipo,html){
+  var m=document.getElementById('ia-mensajes');
+  var d=document.createElement('div');
+  d.className=tipo==='user'?'ia-msg-user':'ia-msg-bot';
+  d.innerHTML=(typeof html==='string')?html.replace(/\n/g,'<br>'):html;
+  m.appendChild(d);
+  m.scrollTop=m.scrollHeight;
+  return d;
+}
+function enviarIA(){
+  var input=document.getElementById('ia-input');
+  var txt=input.value.trim();
+  if(!txt)return;
+  input.value='';
+  agregarMensajeIA('user',_iaEsc(txt));
+  var cargando=agregarMensajeIA('bot','⚙️ Buscando...');
+  cargando.classList.add('cargando');
+  setTimeout(function(){
+    try{ cargando.innerHTML=_iaResponder(txt).replace(/\n/g,'<br>'); }
+    catch(e){ cargando.innerHTML='❌ Error: '+_iaEsc(e.message); }
+    cargando.classList.remove('cargando');
+  },150);
+}
 </script>
 </body>
 </html>
