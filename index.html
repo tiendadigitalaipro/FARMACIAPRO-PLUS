@@ -325,6 +325,16 @@ td.med-name{color:var(--text);font-weight:700}
 #ia-input{flex:1;background:#0d1f3c;border:1px solid rgba(0,200,255,0.25);border-radius:8px;color:#e8f4fd;padding:8px 12px;font-size:13px;outline:none}
 #ia-input::placeholder{color:#4a6fa5}
 #ia-input-area button{background:linear-gradient(135deg,#00c8ff,#0080ff);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:16px;font-weight:700}
+/* ── HARDWARE SECTION ── */
+.hw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px}
+.hw-card{background:var(--bg2,#f5f5f5);border:1.5px solid var(--border,#e0e0e0);border-radius:12px;padding:16px;text-align:center;transition:all .2s}
+.hw-card.connected{border-color:#22c55e;background:rgba(34,197,94,0.06)}
+.hw-icon{font-size:28px;margin-bottom:8px}
+.hw-name{font-weight:700;font-size:13px;color:var(--text,#111);margin-bottom:4px}
+.hw-status{font-size:11px;color:var(--text2,#666);margin-bottom:10px}
+.hw-status.ok{color:#22c55e;font-weight:700}
+/* ── TEMAS DE COLOR ── */
+.temas-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:20px}
 </style>
 
 </head>
@@ -735,6 +745,67 @@ td.med-name{color:var(--text);font-weight:700}
             </div>
           </div>
         </div>
+
+        <!-- PERIFÉRICOS Y HARDWARE -->
+        <div class="card" style="margin-top:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div class="card-title">🔌 Periféricos y Hardware</div>
+            <span style="font-size:11px;color:var(--text3,#999)">Chrome + HTTPS requerido para hardware serial</span>
+          </div>
+          <div class="hw-grid">
+            <div class="hw-card" id="hw-card-balanza">
+              <div class="hw-icon">⚖️</div>
+              <div class="hw-name">Balanza Digital</div>
+              <div class="hw-status" id="hw-st-balanza">Desconectada</div>
+              <button class="btn btn-ghost btn-sm" onclick="conectarBalanzaFarm()">Conectar</button>
+            </div>
+            <div class="hw-card" id="hw-card-gaveta">
+              <div class="hw-icon">💰</div>
+              <div class="hw-name">Gaveta de Dinero</div>
+              <div class="hw-status" id="hw-st-gaveta">Desconectada</div>
+              <button class="btn btn-ghost btn-sm" onclick="conectarGavetaFarm()">Conectar</button>
+            </div>
+            <div class="hw-card" id="hw-card-datafono">
+              <div class="hw-icon">💳</div>
+              <div class="hw-name">Datafono / POS</div>
+              <div class="hw-status" id="hw-st-datafono">Requiere integración</div>
+              <button class="btn btn-ghost btn-sm" onclick="infoDatafonoFarm()">¿Cómo integrar?</button>
+            </div>
+            <div class="hw-card" id="hw-card-biopago">
+              <div class="hw-icon">🫆</div>
+              <div class="hw-name">BioPago</div>
+              <div class="hw-status" id="hw-st-biopago">Requiere integración</div>
+              <button class="btn btn-ghost btn-sm" onclick="infoBioPagoFarm()">¿Cómo integrar?</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLORES Y TEMA -->
+        <div class="card" style="margin-top:20px;">
+          <div class="card-title" style="margin-bottom:4px;">🎨 Colores y Tema</div>
+          <div style="font-size:12px;color:var(--text3,#999);margin-bottom:16px;">Elige un tema predefinido o personaliza los colores de la aplicación.</div>
+          <div id="temas-grid" class="temas-wrap"></div>
+          <div style="font-size:12px;font-weight:700;color:var(--text2,#666);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">🖌️ Personalizar colores</div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
+            <div class="form-group" style="flex:1;min-width:130px;">
+              <label class="form-label">Sidebar</label>
+              <input type="color" id="color-sidebar" class="form-input" style="height:40px;padding:4px 6px;cursor:pointer;" oninput="previewColorFarm('sidebar',this.value)">
+            </div>
+            <div class="form-group" style="flex:1;min-width:130px;">
+              <label class="form-label">Color Acento</label>
+              <input type="color" id="color-acento" class="form-input" style="height:40px;padding:4px 6px;cursor:pointer;" oninput="previewColorFarm('acento',this.value)">
+            </div>
+            <div class="form-group" style="flex:1;min-width:130px;">
+              <label class="form-label">Botón Activo</label>
+              <input type="color" id="color-activo" class="form-input" style="height:40px;padding:4px 6px;cursor:pointer;" oninput="previewColorFarm('activo',this.value)">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="guardarColoresCustomFarm()">💾 Aplicar Colores</button>
+            <button class="btn btn-ghost btn-sm" onclick="resetearColoresFarm()">↩ Restablecer</button>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -1878,6 +1949,7 @@ function renderConfiguracion(){
   var md=document.getElementById('pais-moneda-display');if(md)md.textContent=p.simboloLocal+' ('+p.monedaLocalNombre+')';
   var lt=document.getElementById('lbl-tasa-local');if(lt)lt.textContent=p.tasaLabel;
   renderPayMethodsConfig();
+  if(typeof renderConfigColoresFarm==='function') renderConfigColoresFarm();
 }
 function saveConfig(){var cfg=DB.get('config')||{};cfg.negocio=document.getElementById('cfg-negocio').value;cfg.direccion=document.getElementById('cfg-direccion').value;cfg.telefono=document.getElementById('cfg-telefono').value;cfg.rif=document.getElementById('cfg-rif').value;cfg.tasa=STATE.tasa;cfg.pais=STATE.pais||'VE';DB.set('config',cfg);showToast('Configuracion guardada','success');}
 function saveTasa(){var tasa=parseFloat(document.getElementById('cfg-tasa').value);if(!tasa||tasa<=0)return showToast('Ingresa una tasa valida','warn');STATE.tasa=tasa;var cfg=DB.get('config')||{};cfg.tasa=tasa;DB.set('config',cfg);try{renderInventario();}catch(e){}try{renderCart();}catch(e){}try{renderDashboard();}catch(e){}showToast('Tasa actualizada: '+fmtLocal(1)+' por $1','success');}
@@ -2517,6 +2589,199 @@ function imprimirEtiquetas() {
   '</body></html>');
   w.document.close();
 }
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  🎨 SISTEMA DE TEMAS — Farmacia Pro
+// ═══════════════════════════════════════════════════════════
+var TEMAS_FARM = [
+  { id:'azul', nombre:'💙 Azul Médico', vars:{
+    '--sidebar':'#1e3a5f','--sidebar2':'#1d4ed8','--sidebar3':'#2563eb',
+    '--accent':'#1d4ed8','--accent2':'#3b82f6','--accent3':'#60a5fa',
+    '--orange':'#f59e0b','--orange2':'#fbbf24','--orange3':'#fcd34d',
+    '--bg':'#f0f4ff','--bg2':'#e0e9ff','--bg3':'#c7d7fd',
+    '--card':'#ffffff','--card2':'#f5f8ff',
+    '--border':'#bfdbfe','--text':'#0f172a','--text2':'#1e3a5f','--text3':'#1d4ed8',
+    '--shadow':'rgba(29,78,216,0.12)'
+  }},
+  { id:'verde', nombre:'🌿 Verde Salud', vars:{
+    '--sidebar':'#1b4332','--sidebar2':'#2d6a4f','--sidebar3':'#40916c',
+    '--accent':'#2d6a4f','--accent2':'#52b788','--accent3':'#74c69d',
+    '--orange':'#f77f00','--orange2':'#f4a261','--orange3':'#f9c784',
+    '--bg':'#f0f7f0','--bg2':'#e8f5e9','--bg3':'#c8e6c9',
+    '--card':'#ffffff','--card2':'#f5fbf5',
+    '--border':'#c8e6c9','--text':'#1a2e1a','--text2':'#1b4332','--text3':'#2d6a4f',
+    '--shadow':'rgba(45,106,79,0.12)'
+  }},
+  { id:'morado', nombre:'🍇 Morado', vars:{
+    '--sidebar':'#4c1d95','--sidebar2':'#5b21b6','--sidebar3':'#6d28d9',
+    '--accent':'#7c3aed','--accent2':'#8b5cf6','--accent3':'#a78bfa',
+    '--orange':'#d97706','--orange2':'#f59e0b','--orange3':'#fbbf24',
+    '--bg':'#faf5ff','--bg2':'#f3e8ff','--bg3':'#ddd6fe',
+    '--card':'#ffffff','--card2':'#faf5ff',
+    '--border':'#ddd6fe','--text':'#1e0a3c','--text2':'#4c1d95','--text3':'#6d28d9',
+    '--shadow':'rgba(109,40,217,0.12)'
+  }},
+  { id:'rojo', nombre:'🌹 Rojo Pasión', vars:{
+    '--sidebar':'#881337','--sidebar2':'#9f1239','--sidebar3':'#be123c',
+    '--accent':'#be123c','--accent2':'#f43f5e','--accent3':'#fb7185',
+    '--orange':'#059669','--orange2':'#10b981','--orange3':'#34d399',
+    '--bg':'#fff1f2','--bg2':'#ffe4e6','--bg3':'#fecdd3',
+    '--card':'#ffffff','--card2':'#fff5f5',
+    '--border':'#fecdd3','--text':'#1c0008','--text2':'#881337','--text3':'#9f1239',
+    '--shadow':'rgba(190,18,60,0.12)'
+  }},
+  { id:'naranja', nombre:'🍊 Naranja', vars:{
+    '--sidebar':'#7C2D12','--sidebar2':'#9A3412','--sidebar3':'#C2410C',
+    '--accent':'#EA580C','--accent2':'#F97316','--accent3':'#FB923C',
+    '--orange':'#16A34A','--orange2':'#22C55E','--orange3':'#4ADE80',
+    '--bg':'#FFFBF5','--bg2':'#FFF3E0','--bg3':'#FFE0B2',
+    '--card':'#ffffff','--card2':'#FFF8F0',
+    '--border':'#FED7AA','--text':'#1C0A00','--text2':'#7C2D12','--text3':'#92400E',
+    '--shadow':'rgba(234,88,12,0.12)'
+  }},
+  { id:'teal', nombre:'💎 Esmeralda', vars:{
+    '--sidebar':'#134e4a','--sidebar2':'#115e59','--sidebar3':'#0d9488',
+    '--accent':'#0d9488','--accent2':'#14b8a6','--accent3':'#2dd4bf',
+    '--orange':'#f97316','--orange2':'#fb923c','--orange3':'#fdba74',
+    '--bg':'#f0fdfa','--bg2':'#ccfbf1','--bg3':'#99f6e4',
+    '--card':'#ffffff','--card2':'#f0fdfa',
+    '--border':'#99f6e4','--text':'#022c22','--text2':'#134e4a','--text3':'#115e59',
+    '--shadow':'rgba(13,148,136,0.12)'
+  }},
+];
+
+function _aplicarColoresCSSFarm(vars) {
+  var root = document.documentElement;
+  Object.keys(vars).forEach(function(k){ root.style.setProperty(k, vars[k]); });
+}
+
+function _cargarColoresFarm() {
+  var cfg = (window.DB ? DB.get('config') : null) || {};
+  var temaId = cfg.tema_id || 'azul';
+  var tema = TEMAS_FARM.find(function(t){ return t.id===temaId; }) || TEMAS_FARM[0];
+  _aplicarColoresCSSFarm(tema.vars);
+  if (cfg.colores_custom && Object.keys(cfg.colores_custom).length) _aplicarColoresCSSFarm(cfg.colores_custom);
+}
+
+function renderConfigColoresFarm() {
+  var wrap = document.getElementById('temas-grid');
+  if (!wrap) return;
+  var cfg = (window.DB ? DB.get('config') : null) || {};
+  var temaActivo = cfg.tema_id || 'azul';
+  wrap.innerHTML = TEMAS_FARM.map(function(t) {
+    var isActivo = t.id === temaActivo && !cfg.colores_custom;
+    var borde = isActivo ? '2.5px solid var(--accent)' : '2px solid var(--border)';
+    var sombra = isActivo ? '0 0 0 2px var(--accent2)' : 'none';
+    return '<div onclick="aplicarTemaFarm(\''+t.id+'\')" style="cursor:pointer;border-radius:10px;border:'+borde+';box-shadow:'+sombra+';overflow:hidden;transition:all .2s;" title="'+t.nombre+'">'
+      + '<div style="display:flex;height:44px;">'
+      + '<div style="width:24px;background:'+t.vars['--sidebar']+';flex-shrink:0;"></div>'
+      + '<div style="flex:1;background:'+t.vars['--bg']+';display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;padding:4px;">'
+      + '<div style="width:65%;height:5px;border-radius:3px;background:'+t.vars['--accent']+'"></div>'
+      + '<div style="width:45%;height:5px;border-radius:3px;background:'+t.vars['--orange']+'"></div>'
+      + '</div></div>'
+      + '<div style="background:'+t.vars['--bg2']+';padding:4px 6px;font-size:10px;font-weight:600;color:'+t.vars['--text2']+';text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+      + (isActivo ? '✓ ' : '') + t.nombre + '</div></div>';
+  }).join('');
+  var pBase = cfg.colores_custom || (TEMAS_FARM.find(function(t){ return t.id===temaActivo; })||TEMAS_FARM[0]).vars;
+  var es = document.getElementById('color-sidebar'); if(es) es.value = pBase['--sidebar']||'#1e3a5f';
+  var ea = document.getElementById('color-acento');  if(ea) ea.value = pBase['--accent'] ||'#1d4ed8';
+  var eo = document.getElementById('color-activo');  if(eo) eo.value = pBase['--orange'] ||'#f59e0b';
+}
+
+function aplicarTemaFarm(id) {
+  var tema = TEMAS_FARM.find(function(t){ return t.id===id; });
+  if (!tema) return;
+  _aplicarColoresCSSFarm(tema.vars);
+  var cfg = (window.DB ? DB.get('config') : null) || {};
+  cfg.tema_id = id; delete cfg.colores_custom;
+  if (window.DB) DB.set('config', cfg);
+  renderConfigColoresFarm();
+  if (typeof showToast==='function') showToast('✅ Tema "'+tema.nombre+'" aplicado','success');
+}
+
+function previewColorFarm(tipo, val) {
+  var root = document.documentElement;
+  if(tipo==='sidebar'){ root.style.setProperty('--sidebar',val); root.style.setProperty('--sidebar2',val); root.style.setProperty('--sidebar3',val); }
+  if(tipo==='acento') { root.style.setProperty('--accent',val); root.style.setProperty('--accent2',val); root.style.setProperty('--accent3',val); }
+  if(tipo==='activo') { root.style.setProperty('--orange',val); root.style.setProperty('--orange2',val); root.style.setProperty('--orange3',val); }
+}
+
+function guardarColoresCustomFarm() {
+  var es=document.getElementById('color-sidebar'), ea=document.getElementById('color-acento'), eo=document.getElementById('color-activo');
+  if(!es||!ea||!eo) return;
+  var custom = {
+    '--sidebar':es.value,'--sidebar2':es.value,'--sidebar3':es.value,
+    '--accent':ea.value,'--accent2':ea.value,'--accent3':ea.value,
+    '--orange':eo.value,'--orange2':eo.value,'--orange3':eo.value
+  };
+  _aplicarColoresCSSFarm(custom);
+  var cfg = (window.DB ? DB.get('config') : null) || {};
+  cfg.colores_custom = custom; if (window.DB) DB.set('config', cfg);
+  if(typeof showToast==='function') showToast('✅ Colores guardados','success');
+  renderConfigColoresFarm();
+}
+
+function resetearColoresFarm() {
+  var cfg = (window.DB ? DB.get('config') : null) || {};
+  cfg.tema_id='azul'; delete cfg.colores_custom; if(window.DB) DB.set('config',cfg);
+  var root=document.documentElement;
+  var azul=TEMAS_FARM[0];
+  Object.keys(azul.vars).forEach(function(k){ root.style.removeProperty(k); });
+  _aplicarColoresCSSFarm(azul.vars);
+  renderConfigColoresFarm();
+  if(typeof showToast==='function') showToast('↩ Colores restablecidos','success');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  🔌 HARDWARE — Farmacia Pro
+// ═══════════════════════════════════════════════════════════
+window._HW_FARM = { balanza: null, gaveta: null };
+
+async function conectarBalanzaFarm() {
+  if (!navigator.serial) { if(typeof showToast==='function') showToast('⚠️ Requiere Chrome y HTTPS','warn'); return; }
+  try {
+    var port = await navigator.serial.requestPort(); await port.open({baudRate:9600});
+    window._HW_FARM.balanza = port;
+    var el=document.getElementById('hw-st-balanza'); if(el){el.textContent='✅ Conectada';el.className='hw-status ok';}
+    var card=document.getElementById('hw-card-balanza'); if(card) card.classList.add('connected');
+    if(typeof showToast==='function') showToast('✅ Balanza conectada','success');
+  } catch(e) { if(typeof showToast==='function') showToast('❌ No se pudo conectar','warn'); }
+}
+
+async function conectarGavetaFarm() {
+  if (!navigator.serial) { if(typeof showToast==='function') showToast('⚠️ Requiere Chrome y HTTPS','warn'); return; }
+  try {
+    var port = await navigator.serial.requestPort(); await port.open({baudRate:9600});
+    window._HW_FARM.gaveta = port;
+    var el=document.getElementById('hw-st-gaveta'); if(el){el.textContent='✅ Conectada';el.className='hw-status ok';}
+    var card=document.getElementById('hw-card-gaveta'); if(card) card.classList.add('connected');
+    if(typeof showToast==='function') showToast('✅ Gaveta conectada','success');
+  } catch(e) { if(typeof showToast==='function') showToast('❌ No se pudo conectar','warn'); }
+}
+
+function infoDatafonoFarm() {
+  if(typeof showToast==='function') showToast('💳 Contacta a A2K Digital Studio para integración de Datafono — +58 416 411 7331','info');
+}
+function infoBioPagoFarm() {
+  if(typeof showToast==='function') showToast('🫆 Contacta a A2K Digital Studio para integración de BioPago — +58 416 411 7331','info');
+}
+
+// Exponer globalmente
+window.aplicarTemaFarm = aplicarTemaFarm;
+window.renderConfigColoresFarm = renderConfigColoresFarm;
+window.guardarColoresCustomFarm = guardarColoresCustomFarm;
+window.resetearColoresFarm = resetearColoresFarm;
+window.previewColorFarm = previewColorFarm;
+window._cargarColoresFarm = _cargarColoresFarm;
+window.conectarBalanzaFarm = conectarBalanzaFarm;
+window.conectarGavetaFarm = conectarGavetaFarm;
+window.infoDatafonoFarm = infoDatafonoFarm;
+window.infoBioPagoFarm = infoBioPagoFarm;
+
+// Cargar colores al iniciar
+document.addEventListener('DOMContentLoaded', function(){ _cargarColoresFarm(); });
 </script>
 </body>
 </html>
