@@ -1606,6 +1606,17 @@ function calcularVuelto(){
   }
 }
 function confirmarCobroFinal(){
+  // ⚠️ Verificar medicamentos vencidos antes de procesar
+  var hoy=new Date();hoy.setHours(0,0,0,0);
+  var caducados=STATE.cart.filter(function(c){
+    if(!c.vencimiento)return false;
+    var fv=new Date(c.vencimiento);fv.setHours(0,0,0,0);
+    return fv<hoy;
+  });
+  if(caducados.length>0){
+    var nombres=caducados.map(function(c){return c.nombre;}).join(', ');
+    if(!confirm('⚠️ ADVERTENCIA DE SEGURIDAD\n\nLos siguientes medicamentos están VENCIDOS:\n\n'+nombres+'\n\n¿Desea continuar la venta igualmente?')){return;}
+  }
   var total=STATE.cart.reduce(function(a,c){return a+c.precio*c.qty;},0);
   var costo=STATE.cart.reduce(function(a,c){return a+c.costo*c.qty;},0);
   var esMixto=STATE.payMethod&&STATE.payMethod.toLowerCase().includes('mixto');
