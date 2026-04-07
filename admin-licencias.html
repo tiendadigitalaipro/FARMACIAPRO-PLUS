@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin Licencias — FarmaciaPro Plus</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --bg:#060d0f;--bg2:#0d1a1c;--bg3:#162022;
+  --card:rgba(255,255,255,0.03);--card-hover:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.08);--border-green:rgba(0,200,150,0.3);--border-blue:rgba(0,180,216,0.3);
+  --green:#00c896;--green-dim:rgba(0,200,150,0.15);--green-glow:rgba(0,200,150,0.4);
+  --blue:#00b4d8;--blue-dim:rgba(0,180,216,0.12);--blue-glow:rgba(0,180,216,0.3);
+  --gold:#ffc107;--gold-dim:rgba(255,193,7,0.12);
+  --red:#f44336;--red-dim:rgba(244,67,54,0.12);
+  --warn:#ff9800;--warn-dim:rgba(255,152,0,0.12);
+  --text:#e8eaed;--text2:#9aa0a6;--text3:#5f6368;
+  --mono:'JetBrains Mono',monospace;--body:'Inter',sans-serif;
+  --radius:12px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px;line-height:1.5}
+input,select,textarea,button{font-family:var(--body)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+
+/* LOGIN */
+#loginPanel{width:100%;max-width:400px;margin:80px auto 0}
+.login-logo{font-size:60px;text-align:center;margin-bottom:10px;filter:drop-shadow(0 0 30px rgba(0,200,150,0.5));animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.login-title{text-align:center;font-size:24px;font-weight:900;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:2px}
+.login-sub{text-align:center;font-size:12px;color:var(--text3);margin-bottom:32px;letter-spacing:1px}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
+.login-footer{text-align:center;font-size:11px;color:var(--text3);margin-top:16px}
+
+/* ADMIN PANEL */
+#adminPanel{width:100%;max-width:1200px;display:none}
+.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.panel-logo{display:flex;align-items:center;gap:12px}
+.panel-logo-icon{font-size:32px}
+.panel-title{font-size:22px;font-weight:900;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.panel-sub{font-size:11px;color:var(--text3);margin-top:1px;letter-spacing:.5px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+.stat-num{font-size:36px;font-weight:900;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:.5px}
+
+/* TABS */
+.tabs{display:flex;gap:8px;margin-bottom:20px}
+.tab-btn{flex:1;padding:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:700;transition:all .2s}
+.tab-btn.active{background:linear-gradient(135deg,var(--green),var(--blue));color:#fff;border-color:transparent}
+
+/* CARDS */
+.section-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.section-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px;letter-spacing:.5px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
+.form-input{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--green)}
+.form-select{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:14px;outline:none}
+.form-select option{background:var(--bg2)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border-radius:var(--radius-sm);border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,var(--green),var(--blue));color:#fff}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{background:rgba(255,255,255,0.09)}
+.btn-red{background:var(--red-dim);border:1px solid rgba(244,67,54,0.3);color:var(--red)}
+.btn-warn{background:var(--warn-dim);border:1px solid rgba(255,152,0,0.3);color:var(--warn)}
+.btn-full{width:100%}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* CODE BOX */
+.code-box{background:rgba(0,200,150,0.06);border:2px solid var(--border-green);border-radius:var(--radius);padding:20px;text-align:center;margin-top:16px}
+.code-text{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);letter-spacing:3px;word-break:break-all}
+.code-label{font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.code-actions{display:flex;gap:8px;justify-content:center;margin-top:12px}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;border-bottom:1px solid var(--border);text-align:left}
+td{padding:12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;color:var(--text)}
+tr:hover td{background:rgba(255,255,255,0.02)}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-pro{background:var(--green-dim);color:var(--green);border:1px solid var(--border-green)}
+.badge-demo{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(255,193,7,0.3)}
+.badge-rev{background:var(--red-dim);color:var(--red);border:1px solid rgba(244,67,54,0.3)}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-top:12px;display:none}
+.alert-ok{background:var(--green-dim);border:1px solid var(--border-green);color:var(--green)}
+.alert-err{background:var(--red-dim);border:1px solid rgba(244,67,54,0.3);color:var(--red)}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s;max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.ok{background:#1b4d3e;border:1px solid var(--green);color:var(--green)}
+#toast.err{background:#4d1b1b;border:1px solid var(--red);color:var(--red)}
+#toast.warn{background:#4d3a1b;border:1px solid var(--warn);color:var(--warn)}
+
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginPanel">
+  <div class="login-logo">💊</div>
+  <div class="login-title">FarmaciaPro Plus</div>
+  <div class="login-sub">PANEL DE ADMINISTRACIÓN DE LICENCIAS</div>
+  <div class="login-card">
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">Contraseña de Administrador</label>
+      <input type="password" id="admin-pw" class="form-input" placeholder="••••••••••" autocomplete="off" onkeydown="if(event.key==='Enter')loginAdmin()">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="loginAdmin()" style="height:44px;font-size:14px">
+      <i class="fas fa-shield-alt"></i> Acceder al Panel
+    </button>
+    <div id="loginErr" class="alert alert-err" style="display:none;margin-top:12px">❌ Contraseña incorrecta</div>
+    <div class="login-footer" style="margin-top:20px">
+      <i class="fas fa-info-circle"></i> Puedes cambiar la clave desde la configuración de la app principal.
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL ═══ -->
+<div id="adminPanel">
+  <div class="panel-header" style="margin-top:24px">
+    <div class="panel-logo">
+      <div class="panel-logo-icon">💊</div>
+      <div>
+        <div class="panel-title">FarmaciaPro Plus</div>
+        <div class="panel-sub">Sistema de Administración de Licencias · A2K Digital Studio</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Salir</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total Licencias</div></div>
+    <div class="stat-card"><div class="stat-num" id="statPro">0</div><div class="stat-label">Licencias PRO</div></div>
+    <div class="stat-card"><div class="stat-num" id="statDemo">0</div><div class="stat-label">Demos Activas</div></div>
+    <div class="stat-card"><div class="stat-num" id="statRev">0</div><div class="stat-label">Revocadas</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tabPro" onclick="switchTab('pro')"><i class="fas fa-crown"></i> Generar PRO</button>
+    <button class="tab-btn" id="tabDemo" onclick="switchTab('demo')"><i class="fas fa-clock"></i> Generar DEMO</button>
+    <button class="tab-btn" id="tabLics" onclick="switchTab('lics')"><i class="fas fa-list"></i> Ver Licencias</button>
+  </div>
+
+  <!-- PANEL PRO -->
+  <div id="panelPro" class="section-card">
+    <div class="section-title"><i class="fas fa-crown" style="color:var(--green)"></i> Generar Licencia PRO</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Nombre de la Farmacia</label>
+        <input type="text" id="pro-negocio" class="form-input" placeholder="Farmacia La Salud...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono / WhatsApp</label>
+        <input type="text" id="pro-phone" class="form-input" placeholder="+58 424 000 0000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Terminales (dispositivos)</label>
+        <select id="pro-terminales" class="form-select">
+          <option value="1">1 Terminal</option>
+          <option value="2">2 Terminales</option>
+          <option value="3">3 Terminales</option>
+          <option value="5">5 Terminales</option>
+          <option value="99">Ilimitado</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Duración</label>
+        <select id="pro-duracion" class="form-select">
+          <option value="0">Vitalicia (sin vencimiento)</option>
+          <option value="365">1 Año</option>
+          <option value="180">6 Meses</option>
+          <option value="90">3 Meses</option>
+          <option value="30">1 Mes</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="generarPro()" style="margin-top:16px;height:44px">
+      <i class="fas fa-key"></i> Generar Código PRO
+    </button>
+    <div id="codePro" class="code-box hidden">
+      <div class="code-label">Código de Activación PRO</div>
+      <div class="code-text" id="codeProText"></div>
+      <div class="code-actions">
+        <button class="btn btn-ghost btn-sm" onclick="copiarCodigo('codeProText')"><i class="fas fa-copy"></i> Copiar</button>
+        <button class="btn btn-primary btn-sm" onclick="enviarWhatsapp('pro')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL DEMO -->
+  <div id="panelDemo" class="section-card hidden">
+    <div class="section-title"><i class="fas fa-clock" style="color:var(--gold)"></i> Generar Código DEMO</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Nombre de la Farmacia</label>
+        <input type="text" id="demo-negocio" class="form-input" placeholder="Farmacia San José...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono / WhatsApp</label>
+        <input type="text" id="demo-phone" class="form-input" placeholder="+58 424 000 0000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Días de prueba</label>
+        <select id="demo-dias" class="form-select">
+          <option value="5">5 días</option>
+          <option value="7">7 días</option>
+          <option value="15">15 días</option>
+          <option value="30">30 días</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-warn btn-full" onclick="generarDemo()" style="margin-top:16px;height:44px">
+      <i class="fas fa-flask"></i> Generar Código DEMO
+    </button>
+    <div id="codeDemo" class="code-box hidden" style="border-color:rgba(255,193,7,0.3)">
+      <div class="code-label">Código DEMO</div>
+      <div class="code-text" id="codeDemoText" style="color:var(--gold)"></div>
+      <div class="code-actions">
+        <button class="btn btn-ghost btn-sm" onclick="copiarCodigo('codeDemoText')"><i class="fas fa-copy"></i> Copiar</button>
+        <button class="btn btn-primary btn-sm" onclick="enviarWhatsapp('demo')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL LICENCIAS -->
+  <div id="panelLics" class="section-card hidden">
+    <div class="section-title"><i class="fas fa-list" style="color:var(--blue)"></i> Licencias Generadas</div>
+    <div style="margin-bottom:12px;display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="renderTable()"><i class="fas fa-sync"></i> Actualizar</button>
+      <button class="btn btn-red btn-sm" onclick="limpiarRevocadas()"><i class="fas fa-trash"></i> Limpiar Revocadas</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Farmacia</th>
+            <th>Código</th>
+            <th>Tipo</th>
+            <th>Terminales</th>
+            <th>Vencimiento</th>
+            <th>Creada</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="licTable"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">Sin licencias generadas aún</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══ CONFIG ═══
+var ADMIN_PW_DEFAULT = 'FARM2026admin';
+var DB_KEY = 'farm_licencias_admin';
+var SIGN_SALT = 'FARMACIAPRO2026A2K';
+
+// ═══ DB ═══
+function getDB() {
+  try { var v = localStorage.getItem(DB_KEY); return v ? JSON.parse(v) : { clients: [], demos: [], adminPw: ADMIN_PW_DEFAULT }; } catch(e) { return { clients: [], demos: [], adminPw: ADMIN_PW_DEFAULT }; }
+}
+function saveDB(d) { try { localStorage.setItem(DB_KEY, JSON.stringify(d)); } catch(e) {} }
+
+// ═══ HASH ═══
+function _hash(s) {
+  var h = 0x811c9dc5 >>> 0;
+  for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h.toString(16);
+}
+
+// ═══ GENERAR CÓDIGO ═══
+function genCode(prefix, extra) {
+  var rnd = Math.random().toString(36).substr(2, 4).toUpperCase();
+  var rnd2 = Math.random().toString(36).substr(2, 4).toUpperCase();
+  var base = prefix + '-' + extra + rnd + '-' + rnd2;
+  var sign = _hash(base + SIGN_SALT).substr(0, 4).toUpperCase();
+  return base + '-' + sign;
+}
+
+// ═══ LOGIN ═══
+function loginAdmin() {
+  var db = getDB();
+  var pw = (document.getElementById('admin-pw') || {}).value || '';
+  var adminPw = db.adminPw || ADMIN_PW_DEFAULT;
+  var validos = [ADMIN_PW_DEFAULT, 'ZYNC2024admin', 'a2k2026'];
+  if (pw !== adminPw && validos.indexOf(pw) < 0) {
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('admin-pw').value = '';
+    document.getElementById('admin-pw').focus();
+    return;
+  }
+  document.getElementById('loginPanel').style.display = 'none';
+  document.getElementById('adminPanel').style.display = 'block';
+  renderStats();
+  renderTable();
+}
+
+function cerrarSesion() {
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('loginPanel').style.display = 'block';
+  document.getElementById('admin-pw').value = '';
+}
+
+// ═══ TABS ═══
+var currentTab = 'pro';
+function switchTab(t) {
+  currentTab = t;
+  ['pro','demo','lics'].forEach(function(x) {
+    document.getElementById('panel' + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle('hidden', x !== t);
+    document.getElementById('tab' + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle('active', x === t);
+  });
+  if (t === 'lics') renderTable();
+}
+
+// ═══ GENERAR PRO ═══
+var _ultimaPro = null;
+function generarPro() {
+  var negocio = (document.getElementById('pro-negocio').value || '').trim();
+  var phone = (document.getElementById('pro-phone').value || '').trim();
+  var terminales = document.getElementById('pro-terminales').value;
+  var duracion = parseInt(document.getElementById('pro-duracion').value);
+  if (!negocio) { toast('Ingresa el nombre de la farmacia', 'err'); return; }
+  var code = genCode('FARM-PRO', terminales + 'T');
+  var exp = duracion === 0 ? null : new Date(Date.now() + duracion * 86400000).toISOString();
+  var lic = { id: Date.now(), type: 'PRO', negocio: negocio, phone: phone, code: code, terminales: parseInt(terminales), createdAt: new Date().toISOString(), expiresAt: exp, status: 'Activa' };
+  var db = getDB(); db.clients.push(lic); saveDB(db);
+  _ultimaPro = lic;
+  document.getElementById('codeProText').textContent = code;
+  document.getElementById('codePro').classList.remove('hidden');
+  renderStats();
+  toast('✅ Licencia PRO generada', 'ok');
+}
+
+// ═══ GENERAR DEMO ═══
+var _ultimaDemo = null;
+function generarDemo() {
+  var negocio = (document.getElementById('demo-negocio').value || '').trim();
+  var phone = (document.getElementById('demo-phone').value || '').trim();
+  var dias = parseInt(document.getElementById('demo-dias').value);
+  if (!negocio) { toast('Ingresa el nombre de la farmacia', 'err'); return; }
+  var code = genCode('FARM-DEMO', dias + 'D');
+  var exp = new Date(Date.now() + dias * 86400000).toISOString();
+  var lic = { id: Date.now(), type: 'DEMO', negocio: negocio, phone: phone, code: code, dias: dias, createdAt: new Date().toISOString(), expiresAt: exp, status: 'Activa' };
+  var db = getDB(); db.demos.push(lic); saveDB(db);
+  _ultimaDemo = lic;
+  document.getElementById('codeDemoText').textContent = code;
+  document.getElementById('codeDemo').classList.remove('hidden');
+  renderStats();
+  toast('✅ Código DEMO generado', 'ok');
+}
+
+// ═══ STATS ═══
+function renderStats() {
+  var db = getDB();
+  var all = (db.clients || []).concat(db.demos || []);
+  document.getElementById('statTotal').textContent = all.length;
+  document.getElementById('statPro').textContent = (db.clients || []).filter(function(l){return l.status==='Activa';}).length;
+  document.getElementById('statDemo').textContent = (db.demos || []).filter(function(l){return l.status==='Activa';}).length;
+  document.getElementById('statRev').textContent = all.filter(function(l){return l.status==='Revocada';}).length;
+}
+
+// ═══ TABLE ═══
+function renderTable() {
+  var db = getDB();
+  var all = (db.clients || []).concat(db.demos || []).sort(function(a,b){return b.id-a.id;});
+  var tbody = document.getElementById('licTable');
+  if (!all.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">Sin licencias generadas aún</td></tr>'; return; }
+  tbody.innerHTML = all.map(function(l) {
+    var badge = l.type==='PRO' ? '<span class="badge badge-pro">PRO</span>' : l.status==='Revocada' ? '<span class="badge badge-rev">Revocada</span>' : '<span class="badge badge-demo">DEMO</span>';
+    var exp = l.expiresAt ? new Date(l.expiresAt).toLocaleDateString('es-VE') : 'Vitalicia';
+    var created = new Date(l.createdAt).toLocaleDateString('es-VE');
+    return '<tr><td><strong>'+l.negocio+'</strong>'+(l.phone?'<br><small style="color:var(--text3)">'+l.phone+'</small>':'')+'</td><td><code style="font-family:var(--mono);font-size:11px;color:var(--green)">'+l.code+'</code></td><td>'+badge+'</td><td>'+(l.terminales||'-')+'</td><td>'+exp+'</td><td>'+created+'</td><td><button class="btn btn-red btn-sm" onclick="revocar('+l.id+')"><i class="fas fa-ban"></i></button></td></tr>';
+  }).join('');
+}
+
+function revocar(id) {
+  if (!confirm('¿Revocar esta licencia?')) return;
+  var db = getDB();
+  ['clients','demos'].forEach(function(k){ (db[k]||[]).forEach(function(l){if(l.id===id)l.status='Revocada';}); });
+  saveDB(db); renderTable(); renderStats(); toast('Licencia revocada','warn');
+}
+
+function limpiarRevocadas() {
+  if (!confirm('¿Eliminar todas las licencias revocadas?')) return;
+  var db = getDB();
+  db.clients = (db.clients||[]).filter(function(l){return l.status!=='Revocada';});
+  db.demos = (db.demos||[]).filter(function(l){return l.status!=='Revocada';});
+  saveDB(db); renderTable(); renderStats(); toast('Revocadas eliminadas','ok');
+}
+
+// ═══ UTILIDADES ═══
+function copiarCodigo(id) {
+  var txt = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(txt).then(function(){toast('✅ Código copiado','ok');});
+}
+
+function enviarWhatsapp(tipo) {
+  var lic = tipo === 'pro' ? _ultimaPro : _ultimaDemo;
+  if (!lic) return;
+  var vence = lic.expiresAt ? new Date(lic.expiresAt).toLocaleDateString('es-VE') : 'Sin vencimiento (Vitalicia)';
+  var msg = '💊 *FARMACIAPRO PLUS — Código de Activación*\n\n'
+    + '📋 *Farmacia:* ' + lic.negocio + '\n'
+    + '🔑 *Código:* `' + lic.code + '`\n'
+    + '🏷️ *Tipo:* ' + lic.type + '\n'
+    + '📅 *Vencimiento:* ' + vence + '\n\n'
+    + '*Instrucciones:*\n'
+    + '1. Abre FarmaciaPro Plus\n'
+    + '2. En la pantalla de login, ingresa el código\n'
+    + '3. ¡Listo! Acceso activado.\n\n'
+    + '📞 Soporte: +58 416 411 7331\n'
+    + '_A2K Digital Studio © 2026_';
+  var phone = lic.phone ? lic.phone.replace(/\D/g,'') : '';
+  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + (type||'ok');
+  setTimeout(function(){t.className='';}, 3000);
+}
+
+// ═══ INIT ═══
+document.getElementById('admin-pw').focus();
+</script>
+</body>
+</html>
