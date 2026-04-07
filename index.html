@@ -1774,24 +1774,37 @@ function mostrarCierreDiario(){
   var ventas=DB.get('ventas')||[];
   var hoy=new Date().toDateString();
   var vh=ventas.filter(function(v){return new Date(v.fecha).toDateString()===hoy;});
-  var total=vh.reduce(function(a,v){return a+v.totalUSD;},0);
-  var ganancia=vh.reduce(function(a,v){return a+(v.totalUSD-(v.costoTotal||0));},0);
+  // Separar fiado: NO entra en caja, es dinero pendiente de cobro
+  var vhCobradas=vh.filter(function(v){return (v.metodo||'').toLowerCase()!=='fiado';});
+  var vhFiado=vh.filter(function(v){return (v.metodo||'').toLowerCase()==='fiado';});
+  var total=vhCobradas.reduce(function(a,v){return a+v.totalUSD;},0);
+  var totalFiado=vhFiado.reduce(function(a,v){return a+v.totalUSD;},0);
+  var ganancia=vhCobradas.reduce(function(a,v){return a+(v.totalUSD-(v.costoTotal||0));},0);
+  // Desglosar mixto por sub-método real
   var porMetodo={};
-  vh.forEach(function(v){porMetodo[v.metodo]=(porMetodo[v.metodo]||0)+v.totalUSD;});
+  vhCobradas.forEach(function(v){
+    if((v.metodo||'').toLowerCase()==='mixto'&&v.pagos&&v.pagos.length){
+      v.pagos.forEach(function(p){porMetodo[p.metodo]=(porMetodo[p.metodo]||0)+p.monto;});
+    } else {
+      porMetodo[v.metodo]=(porMetodo[v.metodo]||0)+v.totalUSD;
+    }
+  });
   var metodoRows=Object.entries(porMetodo).map(function(e){return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">'+e[0]+'</span><span style="color:var(--text);font-weight:600">$'+fmt(e[1])+'</span></div>';}).join('');
+  var fiadoRow=totalFiado>0?'<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:2px solid var(--warn);margin-top:6px"><span style="color:var(--warn);font-weight:700">📋 Por Cobrar (Fiado)</span><span style="color:var(--warn);font-weight:700">$'+fmt(totalFiado)+' — NO en caja</span></div>':'';
   var el=document.getElementById('cierreContent');
   if(el)el.innerHTML=[
     '<div class="stats-grid" style="grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">',
-    '<div class="stat-card blue"><div class="stat-label">Total Ventas</div><div class="stat-val blue">$'+fmt(total)+'</div><div class="stat-sub">'+fmtLocal(total*STATE.tasa)+'</div></div>',
-    '<div class="stat-card green"><div class="stat-label">Transacciones</div><div class="stat-val green">'+vh.length+'</div><div class="stat-sub">ventas hoy</div></div>',
+    '<div class="stat-card blue"><div class="stat-label">Total Cobrado</div><div class="stat-val blue">$'+fmt(total)+'</div><div class="stat-sub">'+fmtLocal(total*STATE.tasa)+'</div></div>',
+    '<div class="stat-card green"><div class="stat-label">Transacciones</div><div class="stat-val green">'+vhCobradas.length+'</div><div class="stat-sub">ventas cobradas</div></div>',
     '<div class="stat-card green"><div class="stat-label">Ganancia</div><div class="stat-val green">$'+fmt(ganancia)+'</div><div class="stat-sub">'+(total>0?((ganancia/total)*100).toFixed(1):0)+'% margen</div></div>',
-    '<div class="stat-card blue"><div class="stat-label">Ticket Prom.</div><div class="stat-val blue">$'+fmt(vh.length?total/vh.length:0)+'</div><div class="stat-sub">por venta</div></div>',
+    '<div class="stat-card blue"><div class="stat-label">Ticket Prom.</div><div class="stat-val blue">$'+fmt(vhCobradas.length?total/vhCobradas.length:0)+'</div><div class="stat-sub">por venta</div></div>',
     '</div>',
-    '<div class="card"><div class="card-title mb-3">Desglose por Metodo</div>',
+    '<div class="card"><div class="card-title mb-3">Desglose por Metodo de Pago</div>',
     metodoRows||'<div style="color:var(--text2);text-align:center;padding:14px">Sin ventas hoy</div>',
+    fiadoRow,
     '</div>'
   ].join('');
-  STATE._cierreDiario={total:total,ganancia:ganancia,transacciones:vh.length,porMetodo:porMetodo,tasa:STATE.tasa};
+  STATE._cierreDiario={total:total,totalFiado:totalFiado,ganancia:ganancia,transacciones:vhCobradas.length,porMetodo:porMetodo,tasa:STATE.tasa};
   openModal('modalCierre');
 }
 function enviarCierreWhatsApp(){
@@ -1800,20 +1813,22 @@ function enviarCierreWhatsApp(){
   var cfg=DB.get('config')||{};
   var fecha=new Date().toLocaleDateString('es-VE');
   var metodos=Object.entries(c.porMetodo).map(function(e){return '  '+e[0]+': $'+fmt(e[1]);}).join('\n');
+  var fiadoLinea=(c.totalFiado||0)>0?'\n📋 Por Cobrar (Fiado): $'+fmt(c.totalFiado)+' — NO en caja':'';
   var msg=[
     '🏥 '+( cfg.negocio||'Farmacia Pro'),
     '📊 CIERRE DEL DIA - '+fecha,
     '═══════════════════',
-    '💵 Total Ventas: $'+fmt(c.total),
+    '💵 Total Cobrado: $'+fmt(c.total),
     '🇻🇪 Total Bs: '+fmtLocal(c.total*c.tasa),
     '📈 Ganancia: $'+fmt(c.ganancia),
     '🧾 Transacciones: '+c.transacciones,
     '═══════════════════',
     '💳 Por Metodo:',
     metodos,
+    fiadoLinea,
     '═══════════════════',
     'A2K Digital Studio'
-  ].join('\n');
+  ].filter(Boolean).join('\n');
   var tel=(cfg.telefono||'').replace(/\D/g,'');
   window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msg),'_blank');
 }
